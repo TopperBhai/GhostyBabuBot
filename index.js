@@ -150,6 +150,10 @@ client.on('ready', async () => {
       {
         name: 'inventory',
         description: 'Check how many rare ghosts you have caught.',
+      },
+      {
+        name: 'help',
+        description: 'See all the things Ghosty Babu can do.',
       }
     ]);
     console.log("Slash commands registered!");
@@ -370,6 +374,20 @@ client.on('interactionCreate', async (interaction) => {
       desc += `- ${gType}: **x${count}**\n`;
     }
     return interaction.reply(desc);
+  } else if (interaction.commandName === 'help') {
+    const helpMsg = `👻 **Ghosty Babu Help Menu** 👻\n\n` +
+      `**Commands:**\n` +
+      `\`/rizz <user>\` - Rizz someone up in Hinglish\n` +
+      `\`/flirt <user>\` - Flirt with someone in Hinglish\n` +
+      `\`/roast <user>\` - Brutally roast someone in Hinglish\n` +
+      `\`/bhavishyavani <question>\` - Get a scammy prediction for your future\n` +
+      `\`/catch\` - Catch a Lost Spirit when it randomly spawns in the server\n` +
+      `\`/inventory\` - View your rare ghost collection\n` +
+      `\`/help\` - Show this menu\n\n` +
+      `**Features:**\n` +
+      `• **Parallel Universe**: Every Sunday, exclusive temporary channels (#mars, #hell, #dreamworld) open up!\n` +
+      `• **DMs**: You can DM me directly to chat privately!`;
+    return interaction.reply({ content: helpMsg, ephemeral: false });
   }
 });
 
