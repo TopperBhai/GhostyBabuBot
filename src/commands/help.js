@@ -20,7 +20,7 @@ module.exports = {
         },
         {
           name: "💼 2. HOW TO MAKE MONEY (Legal & Safe)",
-          value: "👉 **`/job apply`** - Get a normal job (like Police or Doctor) and get paid every hour.\n👉 **`/business buy`** - Buy a Farm, Factory, Media Company or Casino!\n👉 **`/market sell`** - Sell the stuff your business made for big profits.\n👉 **`/realestate buy`** - Buy a house and people will pay you rent every hour.\n👉 **`/stock buy`** - Gamble your money in the stock market.\n👉 **`/bank`** - Store your money safely in the central bank.",
+          value: "👉 **`/job apply`** - Get a normal job (like Police or Doctor) and get paid every hour.\n👉 **`/police arrest`** - (Cops Only) Arrest criminals and steal 15% of their money!\n👉 **`/business buy`** - Buy a Farm, Factory, Media Company or Casino!\n👉 **`/market sell`** - Sell the stuff your business made for big profits.\n👉 **`/realestate buy`** - Buy a house and people will pay you rent every hour.\n👉 **`/stock buy`** - Gamble your money in the stock market.\n👉 **`/bank`** - Store your money safely in the central bank.",
           inline: false
         },
         {
