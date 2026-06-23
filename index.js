@@ -39,6 +39,9 @@ if (process.env.REDIS_URL) {
 }
 client.redis = redisClient;
 
+client.chatHistory = new Map();
+client.saveHistory = () => {};
+
 client.activeSpirit = null;
 
 // Keep-alive server
