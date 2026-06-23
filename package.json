@@ -16,7 +16,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "firebase-admin": "^13.10.0",
+    "ioredis": "^5.11.1",
+    "mongoose": "^9.7.2",
     "node-cron": "^4.5.0",
-    "openai": "^6.44.0"
+    "openai": "^6.44.0",
+    "redis": "^6.0.0"
   }
 }
