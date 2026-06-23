@@ -18,11 +18,11 @@ module.exports = {
             type: 3,
             required: true,
             choices: [
-              { name: 'Shadow Empire', value: 'Shadow Empire' },
-              { name: 'Frost Union', value: 'Frost Union' },
-              { name: 'Crimson Kingdom', value: 'Crimson Kingdom' },
-              { name: 'Neon Republic', value: 'Neon Republic' },
-              { name: 'Lost Souls', value: 'Lost Souls' }
+              { name: 'Kaleshi Kingdom 🐍', value: 'Kaleshi Kingdom' },
+              { name: 'Pookie Cult 🎀', value: 'Pookie Cult' },
+              { name: 'Nalle Berozgar 🛋️', value: 'Nalle Berozgar' },
+              { name: 'VIP Backbenchers 🎒', value: 'VIP Backbenchers' },
+              { name: 'Badmosh Syndicate 😈', value: 'Badmosh Syndicate' }
             ]
           }
         ]

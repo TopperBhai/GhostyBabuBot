@@ -8,7 +8,7 @@ module.exports = {
     console.log(`👻 Ghosty Babu is online and logged in as ${client.user.tag}!`);
 
     // Initialize Nations in DB
-    const coreNations = ['Shadow Empire', 'Frost Union', 'Crimson Kingdom', 'Neon Republic', 'Lost Souls'];
+    const coreNations = ['Kaleshi Kingdom', 'Pookie Cult', 'Nalle Berozgar', 'VIP Backbenchers', 'Badmosh Syndicate'];
     for (const nationName of coreNations) {
       await Nation.findOneAndUpdate(
         { name: nationName },
