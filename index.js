@@ -100,14 +100,19 @@ client.on('messageCreate', async (message) => {
     
     if (reply) {
       history.push({ role: 'assistant', content: reply });
-      message.reply(reply);
+      try {
+        await message.reply(reply);
+      } catch (err) {
+        // Fallback if original message was deleted
+        await message.channel.send(reply).catch(() => {});
+      }
     } else {
-      message.reply("bro my brain just lagged fr fr 💀");
+      await message.reply("bro my brain just lagged fr fr 💀").catch(() => {});
     }
 
   } catch (error) {
     console.error("NVIDIA API Error:", error.message || error);
-    message.reply("nah im too tired to reply rn 💀 (API Error)");
+    await message.reply("nah im too tired to reply rn 💀 (API Error)").catch(() => {});
   } finally {
     // Always clear the typing interval
     if (typingInterval) clearInterval(typingInterval);
