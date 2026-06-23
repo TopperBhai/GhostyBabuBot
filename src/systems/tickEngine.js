@@ -5,9 +5,9 @@ const Market = require('../models/Market');
 const State = require('../models/State');
 
 module.exports = (client) => {
-  // Global Tick Engine: Runs at the start of every hour
-  cron.schedule('0 * * * *', async () => {
-    console.log("🕒 [TICK ENGINE] Processing hourly salaries and rent...");
+  // Global Tick Engine: Runs every 10 minutes
+  cron.schedule('*/10 * * * *', async () => {
+    console.log("🕒 [TICK ENGINE] Processing every 10 mins (salaries, production, rent)...");
 
     try {
       // Find all users with a job paying a salary, who were active in the last 24 hours
