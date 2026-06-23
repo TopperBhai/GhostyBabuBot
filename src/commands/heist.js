@@ -29,6 +29,15 @@ module.exports = {
 
     let successChance = 0.3; // 30% base chance
 
+    // Check Cult Buff
+    if (user.cult && user.cult !== 'None') {
+      const Cult = require('../models/Cult');
+      const myCult = await Cult.findOne({ name: user.cult });
+      if (myCult && myCult.perk === 'Thieves Guild') {
+        successChance += 0.1; // +10%
+      }
+    }
+
     // Check inventory for Sabotage Kit
     const hasKitIndex = user.inventory.findIndex(i => i.type === 'Sabotage Kit');
     if (hasKitIndex !== -1) {

@@ -5,8 +5,9 @@ const userSchema = new mongoose.Schema({
   wallet: { type: Number, default: 0 },
   nation: { type: String, default: 'None' },
   role: { type: String, default: 'Citizen' },
-  inventory: { type: Array, default: [] },
+  inventory: { type: Array, default: [] }, // Custom artifacts go here too
   portfolio: { type: Object, default: {} },
-  jailUntil: { type: Date, default: null }
+  jailUntil: { type: Date, default: null },
+  cult: { type: String, default: 'None' }
 });
 module.exports = mongoose.model('User', userSchema);

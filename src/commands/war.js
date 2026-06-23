@@ -57,8 +57,17 @@ module.exports = {
     }
 
     // Battle Math
-    const attackPower = attacker.powerScore + (Math.random() * 50);
+    let attackPower = attacker.powerScore + (Math.random() * 50);
     const defensePower = defender.powerScore + (Math.random() * 50);
+
+    // Warmongers Buff Check
+    if (user.cult && user.cult !== 'None') {
+      const Cult = require('../models/Cult');
+      const myCult = await Cult.findOne({ name: user.cult });
+      if (myCult && myCult.perk === 'Warmongers') {
+        attackPower = attackPower * 1.15; // +15% attack power
+      }
+    }
 
     await interaction.reply(`⚔️ **WAR DECLARED!**\n<@${discordId}> has ordered the **${attackerNationName}** to attack the **${targetNationName}**!\n\n*Calculating casualties...*`);
 

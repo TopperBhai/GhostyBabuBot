@@ -74,6 +74,14 @@ module.exports = {
       const businesses = await Business.find({ ownerId: discordId });
       if (businesses.length === 0) return interaction.reply({ content: "You don't own any businesses to collect from.", ephemeral: true });
 
+      const user = await User.findOne({ discordId });
+      let hasCapitalistBuff = false;
+      if (user && user.cult && user.cult !== 'None') {
+        const Cult = require('../models/Cult');
+        const myCult = await Cult.findOne({ name: user.cult });
+        if (myCult && myCult.perk === 'Capitalists') hasCapitalistBuff = true;
+      }
+
       let totalCollected = 0;
       let msg = `💰 **Revenue Collection Report:**\n\n`;
       const now = Date.now();
@@ -82,6 +90,8 @@ module.exports = {
         const config = BIZ_CONFIG[b.type];
         if (now - b.lastCollected >= config.collectInterval) {
           let income = config.baseIncome * b.level;
+          if (hasCapitalistBuff) income = Math.floor(income * 1.2); // +20%
+          
           
           if (config.risk) {
             // Casino can lose money
