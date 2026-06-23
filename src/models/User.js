@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   wallet: { type: Number, default: 0 },
   nation: { type: String, default: 'None' },
   role: { type: String, default: 'Citizen' },
-  inventory: { type: Array, default: [] }
+  inventory: { type: Array, default: [] },
+  portfolio: { type: Object, default: {} } // { stockName: sharesOwned }
 });
 module.exports = mongoose.model('User', userSchema);

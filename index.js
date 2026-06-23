@@ -71,8 +71,10 @@ for (const file of commandFiles) {
   }
 }
 
-// Start GhostLeaks System
+// Start Systems
 require('./src/systems/ghostLeaks')(client);
+require('./src/systems/stockMarket')(client);
+require('./src/systems/disasters')(client);
 
 if (!process.env.DISCORD_BOT_TOKEN || !process.env.NVIDIA_API_KEY) {
   console.error("CRITICAL: Missing DISCORD_BOT_TOKEN or NVIDIA_API_KEY in .env");

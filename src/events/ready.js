@@ -18,6 +18,18 @@ module.exports = {
     }
     console.log("Nations initialized in MongoDB!");
 
+    // Initialize Stocks in DB
+    const Stock = require('../models/Stock');
+    const coreStocks = ['ShadowCorp', 'FrostTech', 'CrimsonArms', 'NeonMedia', 'LostAirlines'];
+    for (const stockName of coreStocks) {
+      await Stock.findOneAndUpdate(
+        { name: stockName },
+        { $setOnInsert: { name: stockName, price: 100, trend: 'STABLE', volatility: 5 } },
+        { upsert: true }
+      ).catch(err => console.error(`Failed to initialize stock ${stockName}:`, err));
+    }
+    console.log("Stocks initialized in MongoDB!");
+
     const commandsData = Array.from(client.commands.values()).map(cmd => cmd.data);
     try {
       await client.application.commands.set(commandsData);

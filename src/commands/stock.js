@@ -1,0 +1,99 @@
+
+const User = require('../models/User');
+const Stock = require('../models/Stock');
+
+module.exports = {
+  data: {
+    name: 'stock',
+    description: 'Wall Street in the GhostVerse. Trade stocks.',
+    options: [
+      {
+        name: 'view',
+        description: 'View the live stock market prices',
+        type: 1
+      },
+      {
+        name: 'buy',
+        description: 'Buy shares of a company',
+        type: 1,
+        options: [
+          { name: 'company', description: 'Company Name', type: 3, required: true, choices: [
+              {name: 'ShadowCorp', value: 'ShadowCorp'}, {name: 'FrostTech', value: 'FrostTech'},
+              {name: 'CrimsonArms', value: 'CrimsonArms'}, {name: 'NeonMedia', value: 'NeonMedia'},
+              {name: 'LostAirlines', value: 'LostAirlines'}
+          ] },
+          { name: 'amount', description: 'Number of shares', type: 4, required: true }
+        ]
+      },
+      {
+        name: 'sell',
+        description: 'Sell your shares',
+        type: 1,
+        options: [
+          { name: 'company', description: 'Company Name', type: 3, required: true, choices: [
+              {name: 'ShadowCorp', value: 'ShadowCorp'}, {name: 'FrostTech', value: 'FrostTech'},
+              {name: 'CrimsonArms', value: 'CrimsonArms'}, {name: 'NeonMedia', value: 'NeonMedia'},
+              {name: 'LostAirlines', value: 'LostAirlines'}
+          ] },
+          { name: 'amount', description: 'Number of shares', type: 4, required: true }
+        ]
+      }
+    ]
+  },
+  async execute(interaction, client) {
+    const sub = interaction.options.getSubcommand();
+    const discordId = interaction.user.id;
+
+    if (sub === 'view') {
+      const stocks = await Stock.find();
+      let desc = `📈 **GhostVerse Stock Exchange (GVSE)** 📉\n\n`;
+      stocks.forEach(s => {
+        const icon = s.trend === 'BULL' ? '🟢 📈' : s.trend === 'BEAR' ? '🔴 📉' : '🟡 ➖';
+        desc += `${icon} **${s.name}**: 🪙${Math.floor(s.price)}\n`;
+      });
+      return interaction.reply(desc);
+    }
+
+    const company = interaction.options.getString('company');
+    const amount = interaction.options.getInteger('amount');
+    
+    if (amount <= 0) return interaction.reply({ content: "Invalid amount.", ephemeral: true });
+
+    const stock = await Stock.findOne({ name: company });
+    if (!stock) return interaction.reply({ content: "Company not found.", ephemeral: true });
+    
+    const cost = Math.floor(stock.price * amount);
+
+    let user = await User.findOne({ discordId });
+    if (!user) return interaction.reply({ content: "You don't exist in the database.", ephemeral: true });
+
+    if (!user.portfolio) user.portfolio = {};
+
+    if (sub === 'buy') {
+      if (user.wallet < cost) return interaction.reply({ content: `You need 🪙**${cost.toLocaleString()}** to buy ${amount} shares of ${company}.`, ephemeral: true });
+      
+      user.wallet -= cost;
+      user.portfolio[company] = (user.portfolio[company] || 0) + amount;
+      
+      // Mongoose mixed type markModified
+      user.markModified('portfolio');
+      await user.save();
+      
+      return interaction.reply(`📈 You successfully bought **${amount} shares** of **${company}** for 🪙${cost.toLocaleString()}.`);
+    }
+
+    if (sub === 'sell') {
+      const owned = user.portfolio[company] || 0;
+      if (owned < amount) return interaction.reply({ content: `You only own ${owned} shares of ${company}.`, ephemeral: true });
+      
+      user.wallet += cost;
+      user.portfolio[company] -= amount;
+      if (user.portfolio[company] <= 0) delete user.portfolio[company];
+      
+      user.markModified('portfolio');
+      await user.save();
+      
+      return interaction.reply(`📉 You successfully sold **${amount} shares** of **${company}** for 🪙${cost.toLocaleString()}.`);
+    }
+  }
+};

@@ -1,5 +1,6 @@
 
 const User = require('../models/User');
+const Business = require('../models/Business');
 
 module.exports = {
   data: {
@@ -17,6 +18,16 @@ module.exports = {
       return interaction.reply({ content: "This user hasn't stepped into the GhostVerse yet.", ephemeral: true });
     }
 
+    const bizCount = await Business.countDocuments({ ownerId: targetUser.id });
+    
+    let portfolioStr = "";
+    if (userRecord.portfolio) {
+      for (const [company, shares] of Object.entries(userRecord.portfolio)) {
+        portfolioStr += `${company}: ${shares} shares\n`;
+      }
+    }
+    if (portfolioStr === "") portfolioStr = "No investments.";
+
     const embed = {
       color: 0x2b2d31,
       title: `${targetUser.username}'s Profile`,
@@ -24,7 +35,9 @@ module.exports = {
       fields: [
         { name: 'Nation', value: userRecord.nation, inline: true },
         { name: 'Role', value: userRecord.role, inline: true },
+        { name: 'Businesses', value: `🏢 ${bizCount}`, inline: true },
         { name: 'Ghost Coins', value: `🪙 ${userRecord.wallet.toLocaleString()}`, inline: false },
+        { name: 'Stock Portfolio', value: portfolioStr, inline: false },
       ]
     };
 
