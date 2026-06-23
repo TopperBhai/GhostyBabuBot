@@ -98,6 +98,30 @@ client.on('ready', async () => {
             required: true,
           }
         ]
+      },
+      {
+        name: 'roast',
+        description: 'Tag a user and Ghosty Babu will brutally roast them in Hinglish.',
+        options: [
+          {
+            name: 'user',
+            description: 'The person you want to roast',
+            type: 6, // USER type
+            required: true,
+          }
+        ]
+      },
+      {
+        name: 'bhavishyavani',
+        description: 'Ask Ghosty Babu a question about your future.',
+        options: [
+          {
+            name: 'question',
+            description: 'The question you want to ask',
+            type: 3, // STRING type
+            required: true,
+          }
+        ]
       }
     ]);
     console.log("Slash commands registered!");
@@ -109,22 +133,29 @@ client.on('ready', async () => {
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'rizz' || interaction.commandName === 'flirt') {
+  if (['rizz', 'flirt', 'roast'].includes(interaction.commandName)) {
     const targetUser = interaction.options.getUser('user');
     const targetMember = interaction.options.getMember('user');
 
     if (targetUser.id === client.user.id) {
       const errorMsg = interaction.commandName === 'rizz' 
         ? "bhai kisko rizz karu? mere alawa kisi insaan ko tag kar 💀"
-        : "bhai mujhse hi flirt karega kya? kisi insaan ko tag kar 💀";
+        : interaction.commandName === 'flirt'
+        ? "bhai mujhse hi flirt karega kya? kisi insaan ko tag kar 💀"
+        : "bhai khudko hi roast karu kya? kisi insaan ko tag kar 💀";
       return interaction.reply({ content: errorMsg, ephemeral: true });
     }
 
     await interaction.deferReply();
 
-    const systemPrompt = interaction.commandName === 'rizz'
-      ? "You are Ghosty Babu, an Indian Gen-Z teenager and a master of Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line for the user mentioned. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy."
-      : "You are Ghosty Babu, a cheeky Indian Gen-Z teenager. Flirt with the user mentioned in natural, romantic yet funny Hinglish. Be playful and cheesy. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis.";
+    let systemPrompt = "";
+    if (interaction.commandName === 'rizz') {
+      systemPrompt = "You are Ghosty Babu, an Indian Gen-Z teenager and a master of Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line for the user mentioned. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy.";
+    } else if (interaction.commandName === 'flirt') {
+      systemPrompt = "You are Ghosty Babu, a cheeky Indian Gen-Z teenager. Flirt with the user mentioned in natural, romantic yet funny Hinglish. Be playful and cheesy. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis.";
+    } else {
+      systemPrompt = "You are Ghosty Babu, a highly toxic Indian Gen-Z teenager. Brutally roast the mentioned user in Hinglish. Be creative, savage, and don't hold back. Use Gen-Z slangs. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Keep it short (1-2 lines), use emojis.";
+    }
 
     let targetName = targetUser.username;
     let targetPronouns = "";
@@ -135,9 +166,14 @@ client.on('interactionCreate', async (interaction) => {
       if (roles) targetPronouns = ` (Pronouns: ${roles})`;
     }
 
-    const userPrompt = interaction.commandName === 'rizz'
-      ? `Rizz up this user: ${targetName}${targetPronouns}`
-      : `Flirt with this user: ${targetName}${targetPronouns}`;
+    let userPrompt = "";
+    if (interaction.commandName === 'rizz') {
+      userPrompt = `Rizz up this user: ${targetName}${targetPronouns}`;
+    } else if (interaction.commandName === 'flirt') {
+      userPrompt = `Flirt with this user: ${targetName}${targetPronouns}`;
+    } else {
+      userPrompt = `Roast this user brutally: ${targetName}${targetPronouns}`;
+    }
 
     try {
       const completion = await openai.chat.completions.create({
@@ -177,6 +213,53 @@ client.on('interactionCreate', async (interaction) => {
     } catch (error) {
       console.error("NVIDIA API Error:", error.message || error);
       await interaction.editReply(`nah im too tired to ${interaction.commandName} rn 💀 (API Error)`);
+    }
+  } else if (interaction.commandName === 'bhavishyavani') {
+    const question = interaction.options.getString('question');
+    const targetUser = interaction.user;
+
+    await interaction.deferReply();
+
+    const systemPrompt = "You are Ghosty Babu, acting as a scammy, sarcastic Indian Gen-Z astrologer. Give them a hilariously harsh, realistic, or brutally honest 'prediction' in Hinglish about their question. CRITICAL RULE: Write ONLY in natural conversational Hinglish. NO ENGLISH TRANSLATIONS. Keep it short (1-2 lines), use emojis.";
+    const userPrompt = `Question from ${targetUser.username}: ${question}`;
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "meta/llama-3.1-70b-instruct",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 80,
+        top_p: 1,
+      });
+
+      let reply = completion.choices[0]?.message?.content?.trim();
+      
+      if (reply && reply.startsWith('"') && reply.endsWith('"')) {
+        reply = reply.slice(1, -1);
+      }
+      reply = reply.replace(/\(.*?\)/g, '').trim();
+
+      if (reply) {
+        await interaction.editReply(`**Question:** ${question}\n**Bhavishyavani:** ${reply}`);
+        
+        if (!chatHistory.has(targetUser.id)) {
+          chatHistory.set(targetUser.id, []);
+        }
+        const userHistory = chatHistory.get(targetUser.id);
+        userHistory.push({ role: 'user', content: `[User triggered /bhavishyavani: ${question}]` });
+        userHistory.push({ role: 'assistant', content: reply });
+        while (userHistory.length > 20) userHistory.shift();
+        saveHistory();
+
+      } else {
+        await interaction.editReply(`bro meri teesri aankh kharab ho gayi 💀`);
+      }
+    } catch (error) {
+      console.error("NVIDIA API Error:", error.message || error);
+      await interaction.editReply(`nah my chakras are blocked rn 💀 (API Error)`);
     }
   }
 });
