@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const User = require('../models/User');
 const Business = require('../models/Business');
+const Market = require('../models/Market');
 
 module.exports = (client) => {
   // Global Tick Engine: Runs at the start of every hour
@@ -47,6 +48,62 @@ module.exports = (client) => {
       }
 
       console.log(`✅ [TICK ENGINE] Paid out 🪙${totalPaidOut} in total salaries to ${workers.length} workers.`);
+
+      // ==========================================
+      // 2. SUPPLY CHAIN PRODUCTION
+      // ==========================================
+      const businesses = await Business.find();
+      for (const b of businesses) {
+        let inv = b.inventory || {};
+        const level = b.level || 1;
+
+        if (b.type === 'Farm') {
+          inv['Food'] = (inv['Food'] || 0) + (10 * level);
+        } else if (b.type === 'Mine') {
+          inv['Ore'] = (inv['Ore'] || 0) + (10 * level);
+        } else if (b.type === 'Factory') {
+          if (inv['Ore'] >= 5 * level) {
+            inv['Ore'] -= 5 * level;
+            inv['Goods'] = (inv['Goods'] || 0) + (5 * level);
+          }
+        } else if (b.type === 'Restaurant') {
+          if (inv['Food'] >= 5 * level) {
+            inv['Food'] -= 5 * level;
+            inv['Meals'] = (inv['Meals'] || 0) + (5 * level);
+          }
+        }
+
+        b.inventory = inv;
+        b.markModified('inventory');
+        await b.save();
+      }
+      console.log(`✅ [TICK ENGINE] Supply chains processed.`);
+
+      // ==========================================
+      // 3. NPC CONSUMER ECONOMY
+      // ==========================================
+      const markets = await Market.find();
+      for (const m of markets) {
+        if (m.commodity === 'Meals' || m.commodity === 'Goods') {
+          // NPCs consume finished products
+          const consumed = Math.min(m.supply, m.demand);
+          m.supply -= consumed;
+          
+          // Adjust Price based on Scarcity
+          if (m.supply === 0) {
+            m.price = Math.floor(m.price * 1.10); // +10% price
+            m.demand = Math.floor(m.demand * 1.05); // Demand grows
+          } else if (m.supply > m.demand * 2) {
+            m.price = Math.max(1, Math.floor(m.price * 0.90)); // -10% price
+          }
+        } else {
+          // Raw materials (Food, Ore) decay slowly if not bought
+          m.supply = Math.max(0, m.supply - 100);
+        }
+        await m.save();
+      }
+      console.log(`✅ [TICK ENGINE] NPC Consumption processed.`);
+
     } catch (err) {
       console.error("❌ [TICK ENGINE] Error processing salaries:", err);
     }

@@ -1,8 +1,11 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const OpenAI = require('openai');
+const mongoose = require('mongoose');
+const Redis = require('ioredis');
+const Market = require('./src/models/Market');
 
 const client = new Client({
   intents: [
@@ -11,7 +14,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages
   ],
-  partials: ['CHANNEL']
+  partials: [Partials.Channel]
 });
 
 client.commands = new Collection();
@@ -20,13 +23,26 @@ client.openai = new OpenAI({
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
-const mongoose = require('mongoose');
-const Redis = require('ioredis');
-
 // Connect to MongoDB
 if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI).then(() => {
+  mongoose.connect(process.env.MONGODB_URI).then(async () => {
     console.log("✅ Connected to MongoDB Atlas!");
+    
+    // Seed Market Data
+    const commodities = ['Food', 'Ore', 'Goods', 'Meals'];
+    for (const c of commodities) {
+      const exists = await Market.findOne({ commodity: c });
+      if (!exists) {
+        let basePrice = 50;
+        if (c === 'Ore') basePrice = 100;
+        if (c === 'Goods') basePrice = 300;
+        if (c === 'Meals') basePrice = 200;
+        await new Market({ commodity: c, price: basePrice, supply: 10000, demand: 10000 }).save();
+      }
+    }
+    console.log('✅ Global Market Seeded');
+    
+    client.login(process.env.DISCORD_BOT_TOKEN);
   }).catch(err => console.error("❌ MongoDB Error:", err));
 }
 
@@ -85,5 +101,3 @@ if (!process.env.DISCORD_BOT_TOKEN || !process.env.NVIDIA_API_KEY) {
   console.error("CRITICAL: Missing DISCORD_BOT_TOKEN or NVIDIA_API_KEY in .env");
   process.exit(1);
 }
-
-client.login(process.env.DISCORD_BOT_TOKEN);

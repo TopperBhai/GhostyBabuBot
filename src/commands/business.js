@@ -1,18 +1,17 @@
-
 const User = require('../models/User');
 const Business = require('../models/Business');
 
 const BIZ_CONFIG = {
-  'Mine': { cost: 5000, baseIncome: 100, collectInterval: 1 * 60 * 60 * 1000 }, // 1 hr
-  'Factory': { cost: 20000, baseIncome: 600, collectInterval: 3 * 60 * 60 * 1000 }, // 3 hr
-  'Bank': { cost: 100000, baseIncome: 5000, collectInterval: 12 * 60 * 60 * 1000 }, // 12 hr
-  'Casino': { cost: 250000, baseIncome: 15000, collectInterval: 24 * 60 * 60 * 1000, risk: true } // 24 hr
+  'Farm': { cost: 5000, type: 'Producer' },
+  'Mine': { cost: 10000, type: 'Producer' },
+  'Factory': { cost: 50000, type: 'Manufacturer' },
+  'Restaurant': { cost: 75000, type: 'Manufacturer' }
 };
 
 module.exports = {
   data: {
     name: 'business',
-    description: 'Capitalism awaits. Buy, upgrade, and collect from your businesses.',
+    description: 'Capitalism awaits. Buy, upgrade, and manage your businesses.',
     options: [
       {
         name: 'buy',
@@ -29,41 +28,8 @@ module.exports = {
         ]
       },
       {
-        name: 'collect',
-        description: 'Collect passive revenue from your businesses',
-        type: 1
-const User = require('../models/User');
-const Business = require('../models/Business');
-
-const BIZ_CONFIG = {
-  'Mine': { cost: 5000, baseIncome: 100, collectInterval: 1 * 60 * 60 * 1000 }, // 1 hr
-  'Factory': { cost: 20000, baseIncome: 600, collectInterval: 3 * 60 * 60 * 1000 }, // 3 hr
-  'Bank': { cost: 100000, baseIncome: 5000, collectInterval: 12 * 60 * 60 * 1000 }, // 12 hr
-  'Casino': { cost: 250000, baseIncome: 15000, collectInterval: 24 * 60 * 60 * 1000, risk: true } // 24 hr
-};
-
-module.exports = {
-  data: {
-    name: 'business',
-    description: 'Capitalism awaits. Buy, upgrade, and collect from your businesses.',
-    options: [
-      {
-        name: 'buy',
-        description: 'Buy a new business',
-        type: 1,
-        options: [
-          {
-            name: 'type',
-            description: 'Type of business',
-            type: 3,
-            required: true,
-            choices: Object.keys(BIZ_CONFIG).map(k => ({ name: k + ` (🪙${BIZ_CONFIG[k].cost})`, value: k }))
-          }
-        ]
-      },
-      {
-        name: 'collect',
-        description: 'Collect passive revenue from your businesses',
+        name: 'inventory',
+        description: 'View the inventory of your businesses',
         type: 1
       },
       {
@@ -117,7 +83,7 @@ module.exports = {
       await User.updateOne({ discordId }, { $inc: { wallet: -config.cost } });
       await new Business({ ownerId: discordId, type }).save();
 
-      return interaction.reply(`📈 Congratulations! You are now the proud owner of a **${type}**! Use \`/business collect\` to claim revenue.`);
+      return interaction.reply(`📈 Congratulations! You are now the proud owner of a **${type}**! Use \`/market sell\` to sell goods it produces.`);
     }
 
     if (sub === 'list') {
@@ -132,57 +98,27 @@ module.exports = {
       return interaction.reply(desc);
     }
 
-    if (sub === 'collect') {
+    if (sub === 'inventory') {
       const businesses = await Business.find({ ownerId: discordId });
-      if (businesses.length === 0) return interaction.reply({ content: "You don't own any businesses to collect from.", ephemeral: true });
+      if (businesses.length === 0) return interaction.reply({ content: "You don't own any businesses.", ephemeral: true });
 
-      const user = await User.findOne({ discordId });
-      let hasCapitalistBuff = false;
-      if (user && user.cult && user.cult !== 'None') {
-        const Cult = require('../models/Cult');
-        const myCult = await Cult.findOne({ name: user.cult });
-        if (myCult && myCult.perk === 'Capitalists') hasCapitalistBuff = true;
-      }
+      let msg = `📦 **Corporate Inventory Report:**\n\n`;
 
-      let totalCollected = 0;
-      let msg = `💰 **Revenue Collection Report:**\n\n`;
-      const now = Date.now();
-
-      for (const b of businesses) {
-        const config = BIZ_CONFIG[b.type];
-        if (now - b.lastCollected >= config.collectInterval) {
-          let income = config.baseIncome * b.level;
-          if (hasCapitalistBuff) income = Math.floor(income * 1.2); // +20%
-          
-          
-          const displayName = b.customName || b.type;
-          if (config.risk) {
-            // Casino can lose money
-            if (Math.random() > 0.6) {
-              income = -Math.floor(income / 2);
-              msg += `🎰 ${displayName}: **Lost** 🪙${Math.abs(income)}\n`;
-            } else {
-              income = Math.floor(income * 1.5);
-              msg += `🎰 ${displayName}: **Jackpot!** 🪙${income}\n`;
-            }
-          } else {
-            msg += `🏢 ${displayName}: +🪙${income}\n`;
+      businesses.forEach((b, i) => {
+        const displayName = b.customName || b.type;
+        msg += `**${i+1}. ${displayName}**\n`;
+        
+        let invStr = "";
+        if (b.inventory) {
+          for (const [item, count] of Object.entries(b.inventory)) {
+            invStr += `- ${item}: ${count}\n`;
           }
-
-          totalCollected += income;
-          b.lastCollected = now;
-          await b.save();
-        } else {
-          const timeLeft = Math.floor((config.collectInterval - (now - b.lastCollected)) / 60000);
-          msg += `⏳ ${b.type}: ${timeLeft} mins remaining.\n`;
         }
-      }
+        if (invStr === "") invStr = "- Empty\n";
+        msg += invStr + "\n";
+      });
 
-      if (totalCollected !== 0) {
-        await User.updateOne({ discordId }, { $inc: { wallet: totalCollected } });
-      }
-
-      return interaction.reply(msg + `\n**Net Change:** 🪙${totalCollected}`);
+      return interaction.reply({ content: msg });
     }
 
     if (sub === 'rename') {
@@ -230,8 +166,6 @@ module.exports = {
         return interaction.reply({ content: "They are already employed by another company.", ephemeral: true });
       }
 
-      // To keep things simple without Buttons for now, we just force-hire them (like a draft).
-      // In a full MMO, this would be an offer system.
       targetRecord.jobTitle = title;
       targetRecord.jobSalary = salary;
       targetRecord.employerId = b._id.toString();
@@ -248,13 +182,11 @@ module.exports = {
         return interaction.reply({ content: "They don't work for a player company.", ephemeral: true });
       }
 
-      // Check if the caller actually owns the business they work for
       const b = await Business.findById(targetRecord.employerId);
       if (!b || b.ownerId !== discordId) {
         return interaction.reply({ content: "You do not own the company they work for!", ephemeral: true });
       }
 
-      const oldTitle = targetRecord.jobTitle;
       const displayName = b.customName || b.type;
 
       targetRecord.jobTitle = 'Unemployed';
