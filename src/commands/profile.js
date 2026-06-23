@@ -46,6 +46,7 @@ module.exports = {
       thumbnail: { url: targetUser.displayAvatarURL() },
       fields: [
         { name: 'Status', value: statusStr, inline: false },
+        { name: 'Job', value: `${userRecord.jobTitle} (🪙${userRecord.jobSalary}/h)`, inline: false },
         { name: 'Nation', value: userRecord.nation, inline: true },
         { name: 'Cult', value: userRecord.cult || 'None', inline: true },
         { name: 'Role', value: userRecord.role, inline: true },

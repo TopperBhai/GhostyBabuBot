@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
   inventory: { type: Array, default: [] }, // Custom artifacts go here too
   portfolio: { type: Object, default: {} },
   jailUntil: { type: Date, default: null },
-  cult: { type: String, default: 'None' }
+  cult: { type: String, default: 'None' },
+  jobTitle: { type: String, default: 'Unemployed' },
+  jobSalary: { type: Number, default: 0 },
+  employerId: { type: String, default: 'None' }
 });
 module.exports = mongoose.model('User', userSchema);
