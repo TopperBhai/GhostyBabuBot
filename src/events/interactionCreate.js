@@ -10,13 +10,20 @@ module.exports = {
 
     // PRISON LOCKOUT CHECK
     const restrictedCommands = ['business', 'stock', 'heist'];
+    let userRecord = await User.findOne({ discordId: interaction.user.id });
+    
     if (restrictedCommands.includes(interaction.commandName)) {
-      const userRecord = await User.findOne({ discordId: interaction.user.id });
       if (userRecord && userRecord.jailUntil && userRecord.jailUntil > new Date()) {
         if (interaction.commandName !== 'heist') { // heist has its own custom message for bribes
-          return interaction.reply({ content: `🚨 **ACCESS DENIED.** You are serving a Prison sentence until ${userRecord.jailUntil.toLocaleString()}.`, ephemeral: true });
+          return interaction.reply({ content: `🚨 **ACCESS DENIED.** You are serving a Prison sentence until <t:${Math.floor(userRecord.jailUntil.getTime()/1000)}:R>.`, ephemeral: true });
         }
       }
+    }
+
+    // UPDATE ACTIVE DUTY TIMESTAMP
+    if (userRecord) {
+      userRecord.lastActive = new Date();
+      await userRecord.save();
     }
 
     try {

@@ -2,12 +2,12 @@ const User = require('../models/User');
 const Business = require('../models/Business');
 
 const BIZ_CONFIG = {
-  'Farm': { cost: 5000, type: 'Producer' },
-  'Mine': { cost: 10000, type: 'Producer' },
-  'Factory': { cost: 50000, type: 'Manufacturer' },
-  'Restaurant': { cost: 75000, type: 'Manufacturer' },
-  'Casino': { cost: 250000, type: 'Entertainment' },
-  'Media Company': { cost: 500000, type: 'Influence' }
+  'Farm': { cost: 5000, type: 'Producer', maxSalary: 500 },
+  'Mine': { cost: 10000, type: 'Producer', maxSalary: 1000 },
+  'Factory': { cost: 50000, type: 'Manufacturer', maxSalary: 2000 },
+  'Restaurant': { cost: 75000, type: 'Manufacturer', maxSalary: 2500 },
+  'Casino': { cost: 250000, type: 'Entertainment', maxSalary: 5000 },
+  'Media Company': { cost: 500000, type: 'Influence', maxSalary: 10000 }
 };
 
 module.exports = {
@@ -166,6 +166,12 @@ module.exports = {
       if (index < 0 || index >= businesses.length) return interaction.reply({ content: "Invalid business index.", ephemeral: true });
       
       const b = businesses[index];
+      const config = BIZ_CONFIG[b.type];
+
+      if (salary > config.maxSalary) {
+        return interaction.reply({ content: `The State Government prevents you from paying more than 🪙**${config.maxSalary.toLocaleString()}**/hour for a **${b.type}** to prevent money laundering.`, ephemeral: true });
+      }
+
       const displayName = b.customName || b.type;
 
       // Check if target user exists

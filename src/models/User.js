@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema({
   jobSalary: { type: Number, default: 0 },
   employerId: { type: String, default: 'None' },
   votedFor: { type: String, default: 'None' },
-  votesReceived: { type: Number, default: 0 }
+  votesReceived: { type: Number, default: 0 },
+  lastActive: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('User', userSchema);

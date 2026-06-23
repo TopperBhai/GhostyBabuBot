@@ -10,8 +10,12 @@ module.exports = (client) => {
     console.log("🕒 [TICK ENGINE] Processing hourly salaries and rent...");
 
     try {
-      // Find all users with a job paying a salary
-      const workers = await User.find({ jobSalary: { $gt: 0 } });
+      // Find all users with a job paying a salary, who were active in the last 24 hours
+      const activeCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const workers = await User.find({ 
+        jobSalary: { $gt: 0 },
+        lastActive: { $gte: activeCutoff }
+      });
       
       // Global State object for taxes/payroll
       let state = await State.findOne({ id: 'GLOBAL' });
