@@ -19,11 +19,15 @@ module.exports = {
           value: "`/profile` - View your Net Worth, Nation, Cult, and Artifacts.\n`/join` - Pledge allegiance to a Nation.\n`/nation` - View a Nation's live stats.\n`/leaderboard` - See the top players, nations, and cults."
         },
         {
-          name: "💸 Capitalism",
-          value: "`/business buy|collect|list` - Build your empire and collect passive income.\n`/stock view|buy|sell` - Invest in the volatile Stock Market."
+          name: "dY', Capitalism & Economy",
+          value: "`/job list|apply|quit` - Get a job and earn hourly salary.\n`/business buy|collect|inventory` - Build Farms, Factories, etc.\n`/realestate view|buy|collect` - Buy apartments and mansions for rent.\n`/market view|buy|sell` - Trade commodities on the global market.\n`/stock view|buy|sell` - Invest in the volatile Stock Market."
         },
         {
-          name: "🏴‍☠️ The Underworld",
+          name: "🏛️ Federal Government",
+          value: "`/government treasury` - View the State Treasury and Tax Rates.\n`/government vote` - Vote for President.\n`/government policy` - (President Only) Set the tax rate."
+        },
+        {
+          name: "dY?'??~,? The Underworld",
           value: "`/heist` - Rob the bank for huge payouts (Failure means PRISON).\n`/blackmarket buy` - Purchase illegal tools and Fake Passports.\n`/war declare` - Attack rival Nations to steal 10% of their treasury!"
         },
         {

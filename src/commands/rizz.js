@@ -12,6 +12,6 @@ module.exports = {
 ]
   },
   async execute(interaction, client) {
-    await require('../../handlers/personaHandler')(interaction, client, 'rizz');
+    await require('../handlers/personaHandler')(interaction, client, 'rizz');
   }
 };
