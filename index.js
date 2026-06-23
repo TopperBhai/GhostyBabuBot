@@ -20,33 +20,24 @@ client.openai = new OpenAI({
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
-// Mock Database (Phase 1)
-client.chatHistory = new Map();
-client.ghostInventory = new Map();
-const HISTORY_FILE = './chat_history.json';
-const GHOST_FILE = './ghost_inventory.json';
+const mongoose = require('mongoose');
+const Redis = require('ioredis');
 
-try {
-  if (fs.existsSync(HISTORY_FILE)) {
-    const data = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
-    client.chatHistory = new Map(Object.entries(data));
-  }
-  if (fs.existsSync(GHOST_FILE)) {
-    const data = JSON.parse(fs.readFileSync(GHOST_FILE, 'utf8'));
-    client.ghostInventory = new Map(Object.entries(data));
-  }
-} catch (e) { console.error("Error loading mock DB", e); }
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI).then(() => {
+    console.log("✅ Connected to MongoDB Atlas!");
+  }).catch(err => console.error("❌ MongoDB Error:", err));
+}
 
-client.saveHistory = () => {
-  try {
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(Object.fromEntries(client.chatHistory)), 'utf8');
-  } catch (e) {}
-};
-client.saveGhostInventory = () => {
-  try {
-    fs.writeFileSync(GHOST_FILE, JSON.stringify(Object.fromEntries(client.ghostInventory)), 'utf8');
-  } catch (e) {}
-};
+// Connect to Redis
+let redisClient = null;
+if (process.env.REDIS_URL) {
+  redisClient = new Redis(process.env.REDIS_URL);
+  redisClient.on('connect', () => console.log("✅ Connected to Upstash Redis!"));
+  redisClient.on('error', (err) => console.error("❌ Redis Error:", err));
+}
+client.redis = redisClient;
 
 client.activeSpirit = null;
 
@@ -79,6 +70,9 @@ for (const file of commandFiles) {
     client.commands.set(command.data.name, command);
   }
 }
+
+// Start GhostLeaks System
+require('./src/systems/ghostLeaks')(client);
 
 if (!process.env.DISCORD_BOT_TOKEN || !process.env.NVIDIA_API_KEY) {
   console.error("CRITICAL: Missing DISCORD_BOT_TOKEN or NVIDIA_API_KEY in .env");

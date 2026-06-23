@@ -1,3 +1,5 @@
+const User = require('../models/User');
+
 module.exports = {
   data: {
     name: 'inventory',
@@ -5,7 +7,9 @@ module.exports = {
     options: []
   },
   async execute(interaction, client) {
-    const inv = client.ghostInventory.get(interaction.user.id) || [];
+    const user = await User.findOne({ discordId: interaction.user.id });
+    const inv = user ? user.inventory : [];
+    
   if (inv.length === 0) {
     return interaction.reply("teri inventory ekdum khali hai bhai, zero ghosts 💀 jaake catch kar");
   }

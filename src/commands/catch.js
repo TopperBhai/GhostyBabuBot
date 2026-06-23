@@ -1,3 +1,5 @@
+const User = require('../models/User');
+
 module.exports = {
   data: {
     name: 'catch',
@@ -13,12 +15,11 @@ module.exports = {
   const ghostType = RARE_GHOSTS[Math.floor(Math.random() * RARE_GHOSTS.length)];
   client.activeSpirit = null;
 
-  if (!client.ghostInventory.has(interaction.user.id)) {
-    client.ghostInventory.set(interaction.user.id, []);
-  }
-  const inv = client.ghostInventory.get(interaction.user.id);
-  inv.push({ type: ghostType, caughtAt: Date.now() });
-  client.saveGhostInventory();
+  await User.findOneAndUpdate(
+    { discordId: interaction.user.id },
+    { $push: { inventory: { type: ghostType, caughtAt: Date.now() } } },
+    { upsert: true }
+  );
 
   return interaction.reply(`🎉 **BINGO!** <@${interaction.user.id}> caught a **${ghostType}**! Pokemon Go master pro max 💀`);
   }

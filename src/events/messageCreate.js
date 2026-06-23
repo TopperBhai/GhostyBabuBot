@@ -1,10 +1,26 @@
 const { ChannelType } = require('discord.js');
 const { SYSTEM_PROMPT } = require('../../system-prompt');
+const User = require('../models/User');
 
 module.exports = {
   name: 'messageCreate',
   async execute(message, client) {
     if (message.author.bot) return;
+
+    // Economy Hook (Passive Income)
+    if (client.redis) {
+      const cooldownKey = `cooldown_msg_${message.author.id}`;
+      const isCooldown = await client.redis.get(cooldownKey);
+      if (!isCooldown) {
+        await client.redis.set(cooldownKey, '1', 'EX', 60); // 60s cooldown
+        const coinsEarned = Math.floor(Math.random() * 5) + 1; // 1-5 coins
+        User.findOneAndUpdate(
+          { discordId: message.author.id },
+          { $inc: { wallet: coinsEarned } },
+          { upsert: true }
+        ).catch(()=>{});
+      }
+    }
 
     const isMentioned = message.mentions.has(client.user.id);
     const isDM = message.channel.type === ChannelType.DM || message.channel.type === 1;

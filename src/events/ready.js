@@ -1,10 +1,22 @@
 const cron = require('node-cron');
+const Nation = require('../models/Nation');
 
 module.exports = {
   name: 'ready',
   once: true,
   async execute(client) {
     console.log(`👻 Ghosty Babu is online and logged in as ${client.user.tag}!`);
+
+    // Initialize Nations in DB
+    const coreNations = ['Shadow Empire', 'Frost Union', 'Crimson Kingdom', 'Neon Republic', 'Lost Souls'];
+    for (const nationName of coreNations) {
+      await Nation.findOneAndUpdate(
+        { name: nationName },
+        { $setOnInsert: { name: nationName, population: 0, treasury: 10000, gdp: 500 } },
+        { upsert: true }
+      ).catch(err => console.error(`Failed to initialize nation ${nationName}:`, err));
+    }
+    console.log("Nations initialized in MongoDB!");
 
     const commandsData = Array.from(client.commands.values()).map(cmd => cmd.data);
     try {
