@@ -4,6 +4,7 @@ const OpenAI = require('openai');
 const admin = require('firebase-admin');
 const { SYSTEM_PROMPT } = require('./system-prompt');
 const express = require('express');
+const fs = require('fs');
 
 // Dummy Express server to keep the bot alive on free hosting (like Render)
 const app = express();
@@ -47,7 +48,27 @@ const client = new Client({
 });
 
 // A simple in-memory history map: userId -> array of messages
-const chatHistory = new Map();
+let chatHistory = new Map();
+const HISTORY_FILE = './chat_history.json';
+
+try {
+  if (fs.existsSync(HISTORY_FILE)) {
+    const data = fs.readFileSync(HISTORY_FILE, 'utf8');
+    const parsed = JSON.parse(data);
+    chatHistory = new Map(Object.entries(parsed));
+  }
+} catch (e) {
+  console.error("Error loading chat history:", e);
+}
+
+function saveHistory() {
+  try {
+    const obj = Object.fromEntries(chatHistory);
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(obj), 'utf8');
+  } catch (e) {
+    console.error("Error saving chat history:", e);
+  }
+}
 
 client.on('ready', async () => {
   console.log(`👻 Ghosty Babu is online and logged in as ${client.user.tag}!`);
@@ -129,6 +150,17 @@ client.on('interactionCreate', async (interaction) => {
 
       if (reply) {
         await interaction.editReply(`<@${targetUser.id}> ${reply}`);
+        
+        // Add to chat history so the bot remembers the context of the rizz/flirt
+        if (!chatHistory.has(targetUser.id)) {
+          chatHistory.set(targetUser.id, []);
+        }
+        const userHistory = chatHistory.get(targetUser.id);
+        userHistory.push({ role: 'user', content: `[User triggered /${interaction.commandName}]` });
+        userHistory.push({ role: 'assistant', content: reply });
+        while (userHistory.length > 20) userHistory.shift();
+        saveHistory();
+
       } else {
         await interaction.editReply(`bro my ${interaction.commandName} module just crashed fr fr 💀`);
       }
@@ -173,8 +205,9 @@ client.on('messageCreate', async (message) => {
   // Push user message to history
   history.push({ role: 'user', content: userText || "(User sent an attachment)" });
 
-  // Keep history short (last 10 messages)
-  if (history.length > 10) history.shift();
+  // Keep history short (last 20 messages)
+  while (history.length > 20) history.shift();
+  saveHistory();
 
   try {
     // Call NVIDIA API (Using 70B because it understands natural Hinglish way better)
@@ -193,6 +226,8 @@ client.on('messageCreate', async (message) => {
     
     if (reply) {
       history.push({ role: 'assistant', content: reply });
+      while (history.length > 20) history.shift();
+      saveHistory();
       try {
         await message.reply(reply);
       } catch (err) {
