@@ -60,9 +60,13 @@ client.on('messageCreate', async (message) => {
   const userText = message.content.replace(new RegExp(`<@!?${client.user.id}>`), '').trim();
   if (!userText && message.attachments.size === 0) return;
 
-  // Indicate bot is typing...
+  // Indicate bot is typing continuously until reply is ready
+  let typingInterval;
   try {
     await message.channel.sendTyping();
+    typingInterval = setInterval(() => {
+      message.channel.sendTyping().catch(() => {});
+    }, 9000); // Discord typing indicator expires after 10s, refresh every 9s
   } catch (e) {}
 
   const userId = message.author.id;
@@ -104,6 +108,9 @@ client.on('messageCreate', async (message) => {
   } catch (error) {
     console.error("NVIDIA API Error:", error.message || error);
     message.reply("nah im too tired to reply rn 💀 (API Error)");
+  } finally {
+    // Always clear the typing interval
+    if (typingInterval) clearInterval(typingInterval);
   }
 });
 
