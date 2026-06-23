@@ -39,7 +39,7 @@ module.exports = {
     if (!owner) return interaction.reply({ content: "Casino owner not found.", ephemeral: true });
 
     // Ensure the Casino has liquidity to pay out a potential win (1.5x payout)
-    const potentialPayout = bet * 2; 
+    const potentialPayout = bet * 2;
     if (owner.wallet < potentialPayout) {
       return interaction.reply({ content: `The Casino is too poor to accept this bet. The owner needs at least 🪙${potentialPayout.toLocaleString()} in liquidity.`, ephemeral: true });
     }
