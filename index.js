@@ -65,6 +65,18 @@ client.on('ready', async () => {
             required: true,
           }
         ]
+      },
+      {
+        name: 'flirt',
+        description: 'Tag a user and Ghosty Babu will flirt with them in Hinglish.',
+        options: [
+          {
+            name: 'user',
+            description: 'The person you want to flirt with',
+            type: 6, // USER type
+            required: true,
+          }
+        ]
       }
     ]);
     console.log("Slash commands registered!");
@@ -76,36 +88,53 @@ client.on('ready', async () => {
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'rizz') {
+  if (interaction.commandName === 'rizz' || interaction.commandName === 'flirt') {
     const targetUser = interaction.options.getUser('user');
 
     if (targetUser.id === client.user.id) {
-      return interaction.reply({ content: "bhai kisko rizz karu? mere alawa kisi insaan ko tag kar 💀", ephemeral: true });
+      const errorMsg = interaction.commandName === 'rizz' 
+        ? "bhai kisko rizz karu? mere alawa kisi insaan ko tag kar 💀"
+        : "bhai mujhse hi flirt karega kya? kisi insaan ko tag kar 💀";
+      return interaction.reply({ content: errorMsg, ephemeral: true });
     }
 
     await interaction.deferReply();
+
+    const systemPrompt = interaction.commandName === 'rizz'
+      ? "You are Ghosty Babu, an Indian Gen-Z teenager and a master of Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line for the user mentioned. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy."
+      : "You are Ghosty Babu, a cheeky Indian Gen-Z teenager. Flirt with the user mentioned in natural, romantic yet funny Hinglish. Be playful and cheesy. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis.";
+
+    const userPrompt = interaction.commandName === 'rizz'
+      ? `Rizz up this user: ${targetUser.username}`
+      : `Flirt with this user: ${targetUser.username}`;
 
     try {
       const completion = await openai.chat.completions.create({
         model: "meta/llama-3.1-70b-instruct",
         messages: [
-          { role: "system", content: "You are Ghosty Babu, a master of Gen-Z Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line or rizz message for the user mentioned. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy." },
-          { role: "user", content: `Rizz up this user: ${targetUser.username}` }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.8,
         max_tokens: 80,
         top_p: 1,
       });
 
-      const reply = completion.choices[0]?.message?.content;
+      let reply = completion.choices[0]?.message?.content?.trim();
+      
+      if (reply && reply.startsWith('"') && reply.endsWith('"')) {
+        reply = reply.slice(1, -1);
+      }
+      reply = reply.replace(/\(.*?\)/g, '').trim();
+
       if (reply) {
         await interaction.editReply(`<@${targetUser.id}> ${reply}`);
       } else {
-        await interaction.editReply("bro my rizz module just crashed fr fr 💀");
+        await interaction.editReply(`bro my ${interaction.commandName} module just crashed fr fr 💀`);
       }
     } catch (error) {
       console.error("NVIDIA API Error:", error.message || error);
-      await interaction.editReply("nah im too tired to rizz rn 💀 (API Error)");
+      await interaction.editReply(`nah im too tired to ${interaction.commandName} rn 💀 (API Error)`);
     }
   }
 });
