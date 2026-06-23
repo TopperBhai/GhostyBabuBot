@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Property = require('../models/Property');
+const State = require('../models/State');
 
 const PROPERTY_TYPES = {
   'Apartment': { price: 5000, rent: 100, collectInterval: 3600000 }, // 1 hour
@@ -117,9 +118,19 @@ module.exports = {
       }
 
       if (totalCollected > 0) {
-        user.wallet += totalCollected;
+        let state = await State.findOne({ id: 'GLOBAL' });
+        if (!state) state = await new State({ id: 'GLOBAL' }).save();
+
+        const taxRate = state.taxRate || 0.10;
+        const taxesDue = Math.floor(totalCollected * taxRate);
+        const netIncome = totalCollected - taxesDue;
+
+        state.treasury += taxesDue;
+        await state.save();
+
+        user.wallet += netIncome;
         await user.save();
-        msg += `\n**Total Collected:** 🪙${totalCollected.toLocaleString()}`;
+        msg += `\n**Total Rent Collected:** 🪙${totalCollected.toLocaleString()}\n**Federal Income Tax (${(taxRate*100).toFixed(0)}%):** -🪙${taxesDue.toLocaleString()}\n**Net Income:** 🪙${netIncome.toLocaleString()}`;
       } else {
         msg += `\n*No rent is due yet.*`;
       }

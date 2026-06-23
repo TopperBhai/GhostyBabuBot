@@ -6,6 +6,7 @@ const OpenAI = require('openai');
 const mongoose = require('mongoose');
 const Redis = require('ioredis');
 const Market = require('./src/models/Market');
+const State = require('./src/models/State');
 
 const client = new Client({
   intents: [
@@ -41,6 +42,13 @@ if (process.env.MONGODB_URI) {
       }
     }
     console.log('✅ Global Market Seeded');
+
+    // Seed State
+    const stateExists = await State.findOne({ id: 'GLOBAL' });
+    if (!stateExists) {
+      await new State({ id: 'GLOBAL', treasury: 10000000, taxRate: 0.10, presidentId: 'None' }).save();
+      console.log('✅ Federal Government Seeded');
+    }
     
     client.login(process.env.DISCORD_BOT_TOKEN);
   }).catch(err => console.error("❌ MongoDB Error:", err));

@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema({
   cult: { type: String, default: 'None' },
   jobTitle: { type: String, default: 'Unemployed' },
   jobSalary: { type: Number, default: 0 },
-  employerId: { type: String, default: 'None' }
+  employerId: { type: String, default: 'None' },
+  votedFor: { type: String, default: 'None' },
+  votesReceived: { type: Number, default: 0 }
 });
 module.exports = mongoose.model('User', userSchema);

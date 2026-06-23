@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const User = require('../models/User');
 const Business = require('../models/Business');
 const Market = require('../models/Market');
+const State = require('../models/State');
 
 module.exports = (client) => {
   // Global Tick Engine: Runs at the start of every hour
@@ -12,12 +13,22 @@ module.exports = (client) => {
       // Find all users with a job paying a salary
       const workers = await User.find({ jobSalary: { $gt: 0 } });
       
+      // Global State object for taxes/payroll
+      let state = await State.findOne({ id: 'GLOBAL' });
+      if (!state) state = await new State({ id: 'GLOBAL' }).save();
+
       let totalPaidOut = 0;
+      let statePaidOut = 0;
       for (const worker of workers) {
         if (worker.employerId === 'State') {
-          worker.wallet += worker.jobSalary;
-          totalPaidOut += worker.jobSalary;
-          await worker.save();
+          if (state.treasury >= worker.jobSalary) {
+            state.treasury -= worker.jobSalary;
+            worker.wallet += worker.jobSalary;
+            statePaidOut += worker.jobSalary;
+            await worker.save();
+          } else {
+            // STATE BANKRUPTCY - No pay this hour
+          }
         } else if (worker.employerId !== 'None') {
           // Employee works for a Player Company
           const biz = await Business.findById(worker.employerId);
@@ -47,7 +58,8 @@ module.exports = (client) => {
         }
       }
 
-      console.log(`✅ [TICK ENGINE] Paid out 🪙${totalPaidOut} in total salaries to ${workers.length} workers.`);
+      await state.save();
+      console.log(`✅ [TICK ENGINE] State paid out 🪙${statePaidOut}. Total private payroll: 🪙${totalPaidOut}`);
 
       // ==========================================
       // 2. SUPPLY CHAIN PRODUCTION

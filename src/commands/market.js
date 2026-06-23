@@ -1,6 +1,7 @@
 const Market = require('../models/Market');
 const Business = require('../models/Business');
 const User = require('../models/User');
+const State = require('../models/State');
 
 module.exports = {
   data: {
@@ -91,10 +92,19 @@ module.exports = {
       biz.markModified('inventory');
       await biz.save();
 
-      // Give Player Money
-      await User.updateOne({ discordId }, { $inc: { wallet: revenue } });
+      // Give Player Money (after Taxes)
+      let state = await State.findOne({ id: 'GLOBAL' });
+      if (!state) state = await new State({ id: 'GLOBAL' }).save();
+      const taxRate = state.taxRate || 0.10;
+      const taxesDue = Math.floor(revenue * taxRate);
+      const netRevenue = revenue - taxesDue;
 
-      return interaction.reply(`📈 You sold **${amount} ${commodity}** to the Global Market for **🪙${revenue.toLocaleString()}**!`);
+      state.treasury += taxesDue;
+      await state.save();
+
+      await User.updateOne({ discordId }, { $inc: { wallet: netRevenue } });
+
+      return interaction.reply(`📈 You sold **${amount} ${commodity}** to the Global Market for **🪙${revenue.toLocaleString()}**!\nFederal Tax (${(taxRate*100).toFixed(0)}%): -🪙${taxesDue.toLocaleString()}`);
     }
 
     if (sub === 'buy') {
