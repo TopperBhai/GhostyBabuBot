@@ -1,8 +1,9 @@
-
 const mongoose = require('mongoose');
+
 const userSchema = new mongoose.Schema({
   discordId: { type: String, required: true, unique: true },
   wallet: { type: Number, default: 0 },
+  bank: { type: Number, default: 0 },
   nation: { type: String, default: 'None' },
   role: { type: String, default: 'Citizen' },
   inventory: { type: Array, default: [] }, // Custom artifacts go here too
@@ -15,4 +16,5 @@ const userSchema = new mongoose.Schema({
   votedFor: { type: String, default: 'None' },
   votesReceived: { type: Number, default: 0 }
 });
+
 module.exports = mongoose.model('User', userSchema);

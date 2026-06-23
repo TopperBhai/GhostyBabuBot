@@ -7,6 +7,7 @@ const JOBS = [
   { title: 'Journalist', salary: 400, type: 'Legal', req: 'None' },
   { title: 'Drug Dealer', salary: 500, type: 'Illegal', req: 'None' },
   { title: 'Smuggler', salary: 1200, type: 'Illegal', req: 'None' },
+  { title: 'Mafia Member', salary: 2000, type: 'Illegal', req: 'None' },
   { title: 'Assassin', salary: 2500, type: 'Illegal', req: 'None' } // High risk
 ];
 

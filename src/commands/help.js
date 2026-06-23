@@ -20,22 +20,22 @@ module.exports = {
         },
         {
           name: "💼 2. HOW TO MAKE MONEY (Legal & Safe)",
-          value: "👉 **`/job apply`** - Get a normal job (like Police or Doctor) and get paid every hour.\n👉 **`/business buy`** - Buy a Farm or Factory. They automatically make stuff every hour!\n👉 **`/market sell`** - Sell the stuff your business made for big profits.\n👉 **`/realestate buy`** - Buy a house and people will pay you rent every hour.\n👉 **`/stock buy`** - Gamble your money in the stock market.",
+          value: "👉 **`/job apply`** - Get a normal job (like Police or Doctor) and get paid every hour.\n👉 **`/business buy`** - Buy a Farm, Factory, Media Company or Casino!\n👉 **`/market sell`** - Sell the stuff your business made for big profits.\n👉 **`/realestate buy`** - Buy a house and people will pay you rent every hour.\n👉 **`/stock buy`** - Gamble your money in the stock market.\n👉 **`/bank`** - Store your money safely in the central bank.",
           inline: false
         },
         {
           name: "😈 3. HOW TO MAKE MONEY (Illegal & Dangerous)",
-          value: "👉 **`/heist`** - Try to rob the bank! If you win, you get rich. If you lose, you go to PRISON.\n👉 **`/blackmarket buy`** - Buy illegal items in secret to help you win heists.",
+          value: "👉 **`/heist`** - Try to rob the bank! If you win, you get rich. If you lose, you go to PRISON.\n👉 **`/mafia extort`** - If you are in the Mafia, you can steal from businesses.\n👉 **`/blackmarket buy`** - Buy illegal items in secret to help you win heists.",
           inline: false
         },
         {
           name: "🏛️ 4. POLITICS & NATIONS",
-          value: "👉 **`/join`** - Join a team (Nation) like *Pookie Cult* or *Kaleshi Kingdom*.\n👉 **`/war declare`** - Attack another Nation to steal their money!\n👉 **`/government vote`** - Vote for someone to become the President.\n👉 **`/government policy`** - If you are President, you can raise or lower taxes for everyone!",
+          value: "👉 **`/join`** - Join a team (Nation) like *Pookie Cult* or *Kaleshi Kingdom*.\n👉 **`/war declare`** - Attack another Nation to steal their money!\n👉 **`/government vote`** - Vote for someone to become the President.\n👉 **`/media publish`** - Spread fake news to the whole server!\n👉 **`/government policy`** - If you are President, you can raise or lower taxes for everyone!",
           inline: false
         },
         {
-          name: "🔮 5. MAGIC & GOD MODE",
-          value: "👉 **`/cult found`** - Start your own religion! People can join it to get special superpowers.\n👉 **`/mint`** - Pay 1 Million coins to create a custom legendary item just for you.\n👉 **`/catch`** - If a wild ghost appears in chat, use this to catch it!",
+          name: "🔮 5. MAGIC, CULTS & FAMILY",
+          value: "👉 **`/cult found`** - Start your own religion! People can join it to get special superpowers.\n👉 **`/family`** - Propose marriage or adopt children to build a legacy.\n👉 **`/casino gamble`** - Gamble your money against player-owned casinos.\n👉 **`/mint`** - Pay 1 Million coins to create a custom legendary item just for you.",
           inline: false
         },
         {

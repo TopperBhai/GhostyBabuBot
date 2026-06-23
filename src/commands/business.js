@@ -5,7 +5,9 @@ const BIZ_CONFIG = {
   'Farm': { cost: 5000, type: 'Producer' },
   'Mine': { cost: 10000, type: 'Producer' },
   'Factory': { cost: 50000, type: 'Manufacturer' },
-  'Restaurant': { cost: 75000, type: 'Manufacturer' }
+  'Restaurant': { cost: 75000, type: 'Manufacturer' },
+  'Casino': { cost: 250000, type: 'Entertainment' },
+  'Media Company': { cost: 500000, type: 'Influence' }
 };
 
 module.exports = {
@@ -23,7 +25,14 @@ module.exports = {
             description: 'Type of business',
             type: 3,
             required: true,
-            choices: Object.keys(BIZ_CONFIG).map(k => ({ name: k + ` (🪙${BIZ_CONFIG[k].cost})`, value: k }))
+            choices: [
+              { name: 'Farm (🪙5000)', value: 'Farm' },
+              { name: 'Mine (🪙10000)', value: 'Mine' },
+              { name: 'Factory (🪙50000)', value: 'Factory' },
+              { name: 'Restaurant (🪙75000)', value: 'Restaurant' },
+              { name: 'Casino (🪙250000)', value: 'Casino' },
+              { name: 'Media Company (🪙500000)', value: 'Media Company' }
+            ]
           }
         ]
       },
