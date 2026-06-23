@@ -3,8 +3,8 @@ const cron = require('node-cron');
 const Stock = require('../models/Stock');
 
 module.exports = (client) => {
-  // Run every 5 minutes to fluctuate prices rapidly
-  cron.schedule('*/5 * * * *', async () => {
+  // Run every 1 minute to fluctuate prices rapidly
+  cron.schedule('*/1 * * * *', async () => {
     try {
       const stocks = await Stock.find();
       for (const s of stocks) {

@@ -51,7 +51,7 @@ module.exports = {
     if (sub === 'view') {
       const stocks = await Stock.find();
       
-      let desc = "**Prices fluctuate every 5 minutes. Buy low, sell high!**\n\n";
+      let desc = "**Prices fluctuate every minute. Buy low, sell high!**\n\n";
       
       stocks.forEach(s => {
         let prev = s.previousPrice || s.price;
