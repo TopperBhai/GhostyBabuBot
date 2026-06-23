@@ -18,9 +18,11 @@ module.exports = {
         type: 1,
         options: [
           { name: 'company', description: 'Company Name', type: 3, required: true, choices: [
-              {name: 'ShadowCorp', value: 'ShadowCorp'}, {name: 'FrostTech', value: 'FrostTech'},
-              {name: 'CrimsonArms', value: 'CrimsonArms'}, {name: 'NeonMedia', value: 'NeonMedia'},
-              {name: 'LostAirlines', value: 'LostAirlines'}
+              {name: 'Microhard', value: 'Microhard'}, {name: 'Tasla', value: 'Tasla'},
+              {name: 'Space Y', value: 'Space Y'}, {name: 'Boogle', value: 'Boogle'},
+              {name: 'Beta', value: 'Beta'}, {name: 'HitCoin', value: 'HitCoin'},
+              {name: 'Pintel', value: 'Pintel'}, {name: 'WhiteRock', value: 'WhiteRock'},
+              {name: 'AmmaZone', value: 'AmmaZone'}
           ] },
           { name: 'amount', description: 'Number of shares', type: 4, required: true }
         ]
@@ -31,9 +33,11 @@ module.exports = {
         type: 1,
         options: [
           { name: 'company', description: 'Company Name', type: 3, required: true, choices: [
-              {name: 'ShadowCorp', value: 'ShadowCorp'}, {name: 'FrostTech', value: 'FrostTech'},
-              {name: 'CrimsonArms', value: 'CrimsonArms'}, {name: 'NeonMedia', value: 'NeonMedia'},
-              {name: 'LostAirlines', value: 'LostAirlines'}
+              {name: 'Microhard', value: 'Microhard'}, {name: 'Tasla', value: 'Tasla'},
+              {name: 'Space Y', value: 'Space Y'}, {name: 'Boogle', value: 'Boogle'},
+              {name: 'Beta', value: 'Beta'}, {name: 'HitCoin', value: 'HitCoin'},
+              {name: 'Pintel', value: 'Pintel'}, {name: 'WhiteRock', value: 'WhiteRock'},
+              {name: 'AmmaZone', value: 'AmmaZone'}
           ] },
           { name: 'amount', description: 'Number of shares', type: 4, required: true }
         ]
@@ -93,28 +97,65 @@ module.exports = {
     if (sub === 'buy') {
       if (user.wallet < cost) return interaction.reply({ content: `You need 🪙**${cost.toLocaleString()}** to buy ${amount} shares of ${company}.`, ephemeral: true });
       
+      let currentHolding = user.portfolio[company];
+      // Backwards compatibility check
+      if (typeof currentHolding === 'number') {
+        currentHolding = { amount: currentHolding, avgCost: 0 };
+      }
+      if (!currentHolding) currentHolding = { amount: 0, avgCost: 0 };
+
+      // Calculate new Average Cost
+      let oldTotalCost = currentHolding.amount * currentHolding.avgCost;
+      let newTotalCost = oldTotalCost + cost;
+      let newAmount = currentHolding.amount + amount;
+      let newAvgCost = newTotalCost / newAmount;
+
       user.wallet -= cost;
-      user.portfolio[company] = (user.portfolio[company] || 0) + amount;
+      user.portfolio[company] = { amount: newAmount, avgCost: newAvgCost };
       
       // Mongoose mixed type markModified
       user.markModified('portfolio');
       await user.save();
       
-      return interaction.reply(`📈 You successfully bought **${amount} shares** of **${company}** for 🪙${cost.toLocaleString()}.`);
+      return interaction.reply(`📈 You successfully bought **${amount} shares** of **${company}** for 🪙${cost.toLocaleString()}.\n\`Average Cost: 🪙${Math.floor(newAvgCost).toLocaleString()}/share\``);
     }
 
     if (sub === 'sell') {
-      const owned = user.portfolio[company] || 0;
+      let currentHolding = user.portfolio[company];
+      if (typeof currentHolding === 'number') {
+        currentHolding = { amount: currentHolding, avgCost: 0 };
+      }
+
+      const owned = currentHolding ? currentHolding.amount : 0;
       if (owned < amount) return interaction.reply({ content: `You only own ${owned} shares of ${company}.`, ephemeral: true });
       
+      // Calculate Profit / Loss
+      let avgCost = currentHolding.avgCost || 0;
+      let costBasis = avgCost * amount;
+      let profit = cost - costBasis;
+      let profitPercent = avgCost > 0 ? (profit / costBasis) * 100 : 0;
+      
+      let indicator = profit >= 0 ? '🟢 **PROFIT**' : '🔴 **LOSS**';
+      let percentStr = profitPercent >= 0 ? `+${profitPercent.toFixed(2)}%` : `${profitPercent.toFixed(2)}%`;
+
       user.wallet += cost;
-      user.portfolio[company] -= amount;
-      if (user.portfolio[company] <= 0) delete user.portfolio[company];
+      currentHolding.amount -= amount;
+      
+      if (currentHolding.amount <= 0) {
+        delete user.portfolio[company];
+      } else {
+        user.portfolio[company] = currentHolding;
+      }
       
       user.markModified('portfolio');
       await user.save();
       
-      return interaction.reply(`📉 You successfully sold **${amount} shares** of **${company}** for 🪙${cost.toLocaleString()}.`);
+      const embed = {
+        color: profit >= 0 ? 0x00ff00 : 0xff0000,
+        description: `📉 You successfully sold **${amount} shares** of **${company}** for **🪙${cost.toLocaleString()}**.\n\n${indicator}: \`🪙${profit > 0 ? '+' : ''}${Math.floor(profit).toLocaleString()}\` (${percentStr})`
+      };
+
+      return interaction.reply({ embeds: [embed] });
     }
   }
 };
