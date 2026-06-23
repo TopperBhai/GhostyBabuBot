@@ -3,6 +3,13 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const OpenAI = require('openai');
 const admin = require('firebase-admin');
 const { SYSTEM_PROMPT } = require('./system-prompt');
+const express = require('express');
+
+// Dummy Express server to keep the bot alive on free hosting (like Render)
+const app = express();
+app.get('/', (req, res) => res.send('Ghosty Babu is alive!'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Keep-alive server running on port ${PORT}`));
 
 // Initialize Firebase (optional memory module)
 let db = null;
