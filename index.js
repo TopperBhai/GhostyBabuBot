@@ -1,5 +1,6 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
+const cron = require('node-cron');
 const OpenAI = require('openai');
 const admin = require('firebase-admin');
 const { SYSTEM_PROMPT } = require('./system-prompt');
@@ -70,6 +71,25 @@ function saveHistory() {
   }
 }
 
+let activeSpirit = null;
+let ghostInventory = new Map();
+const GHOST_FILE = './ghost_inventory.json';
+
+try {
+  if (fs.existsSync(GHOST_FILE)) {
+    const data = fs.readFileSync(GHOST_FILE, 'utf8');
+    ghostInventory = new Map(Object.entries(JSON.parse(data)));
+  }
+} catch (e) { console.error("Error loading ghost inventory:", e); }
+
+function saveGhostInventory() {
+  try {
+    fs.writeFileSync(GHOST_FILE, JSON.stringify(Object.fromEntries(ghostInventory)), 'utf8');
+  } catch (e) { console.error("Error saving ghost inventory:", e); }
+}
+
+const RARE_GHOSTS = ["🌌 Cosmic Spirit", "🔥 Hellfire Ghost", "👻 Gully Ka Bhoot", "💀 Narak Pishach", "✨ Shiny Chudail"];
+
 client.on('ready', async () => {
   console.log(`👻 Ghosty Babu is online and logged in as ${client.user.tag}!`);
 
@@ -122,12 +142,70 @@ client.on('ready', async () => {
             required: true,
           }
         ]
+      },
+      {
+        name: 'catch',
+        description: 'Catch an active Lost Spirit if one has spawned!',
+      },
+      {
+        name: 'inventory',
+        description: 'Check how many rare ghosts you have caught.',
       }
     ]);
     console.log("Slash commands registered!");
   } catch (err) {
     console.error("Error registering slash commands:", err);
   }
+
+  // Parallel Universe Cron - Create channels (Sunday 12:00 AM)
+  cron.schedule('0 0 * * 0', async () => {
+    console.log("Creating Parallel Universe channels...");
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        await guild.channels.create({ name: 'mars', type: 0 }); // 0 = GUILD_TEXT
+        await guild.channels.create({ name: 'hell', type: 0 });
+        await guild.channels.create({ name: 'dreamworld', type: 0 });
+      } catch (err) { console.error(`Failed to create channels in ${guild.name}:`, err); }
+    }
+  });
+
+  // Parallel Universe Cron - Delete channels (Monday 12:00 AM)
+  cron.schedule('0 0 * * 1', async () => {
+    console.log("Deleting Parallel Universe channels...");
+    for (const guild of client.guilds.cache.values()) {
+      const channelsToDelete = guild.channels.cache.filter(c => ['mars', 'hell', 'dreamworld'].includes(c.name));
+      for (const channel of channelsToDelete.values()) {
+        try { await channel.delete(); } catch (err) { console.error(`Failed to delete channel in ${guild.name}:`, err); }
+      }
+    }
+  });
+
+  // Random Ghost Spawns (Check every 30 mins, roughly 30% chance to spawn)
+  setInterval(async () => {
+    if (Math.random() > 0.3) return;
+    if (activeSpirit) return; // already active
+
+    const guilds = Array.from(client.guilds.cache.values());
+    if (guilds.length === 0) return;
+    const randomGuild = guilds[Math.floor(Math.random() * guilds.length)];
+    
+    const textChannels = Array.from(randomGuild.channels.cache.filter(c => c.type === 0).values());
+    if (textChannels.length === 0) return;
+    const randomChannel = textChannels[Math.floor(Math.random() * textChannels.length)];
+
+    try {
+      await randomChannel.send("👻 **A Lost Spirit has appeared in this channel!** 👻\nQuick, type `/catch` to claim it before it vanishes!");
+      activeSpirit = { channelId: randomChannel.id, spawnedAt: Date.now() };
+      
+      setTimeout(() => {
+        if (activeSpirit && activeSpirit.channelId === randomChannel.id) {
+          activeSpirit = null;
+          randomChannel.send("💨 The Lost Spirit got bored and vanished into the ether...").catch(()=>{});
+        }
+      }, 10 * 60 * 1000);
+    } catch (err) { console.error("Could not send spirit spawn message:", err); }
+
+  }, 30 * 60 * 1000);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -261,6 +339,37 @@ client.on('interactionCreate', async (interaction) => {
       console.error("NVIDIA API Error:", error.message || error);
       await interaction.editReply(`nah my chakras are blocked rn 💀 (API Error)`);
     }
+  } else if (interaction.commandName === 'catch') {
+    if (!activeSpirit || activeSpirit.channelId !== interaction.channelId) {
+      return interaction.reply("bhai kaha hai bhoot? hawa me haath maar raha hai 💀 nasha kam kar");
+    }
+
+    const ghostType = RARE_GHOSTS[Math.floor(Math.random() * RARE_GHOSTS.length)];
+    activeSpirit = null;
+
+    if (!ghostInventory.has(interaction.user.id)) {
+      ghostInventory.set(interaction.user.id, []);
+    }
+    const inv = ghostInventory.get(interaction.user.id);
+    inv.push({ type: ghostType, caughtAt: Date.now() });
+    saveGhostInventory();
+
+    return interaction.reply(`🎉 **BINGO!** <@${interaction.user.id}> caught a **${ghostType}**! Pokemon Go master pro max 💀`);
+
+  } else if (interaction.commandName === 'inventory') {
+    const inv = ghostInventory.get(interaction.user.id) || [];
+    if (inv.length === 0) {
+      return interaction.reply("teri inventory ekdum khali hai bhai, zero ghosts 💀 jaake catch kar");
+    }
+    const ghostCounts = {};
+    inv.forEach(g => {
+      ghostCounts[g.type] = (ghostCounts[g.type] || 0) + 1;
+    });
+    let desc = "👻 **Teri Ghost Inventory:**\n";
+    for (const [gType, count] of Object.entries(ghostCounts)) {
+      desc += `- ${gType}: **x${count}**\n`;
+    }
+    return interaction.reply(desc);
   }
 });
 
@@ -270,7 +379,7 @@ client.on('messageCreate', async (message) => {
 
   // Check if bot is mentioned or if it's a DM
   const isMentioned = message.mentions.has(client.user.id);
-  const isDM = message.channel.type === 1; // 1 = DM
+  const isDM = message.channel.type === ChannelType.DM || message.channel.type === 1; // 1 = fallback DM
 
   if (!isMentioned && !isDM) return;
 
