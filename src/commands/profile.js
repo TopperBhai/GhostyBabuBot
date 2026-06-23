@@ -1,6 +1,7 @@
 
 const User = require('../models/User');
 const Business = require('../models/Business');
+const Property = require('../models/Property');
 
 module.exports = {
   data: {
@@ -19,6 +20,9 @@ module.exports = {
     }
 
     const bizCount = await Business.countDocuments({ ownerId: targetUser.id });
+    
+    const properties = await Property.find({ ownerId: targetUser.id });
+    const realEstateValue = properties.reduce((acc, p) => acc + p.value, 0);
     
     let portfolioStr = "";
     if (userRecord.portfolio) {
@@ -47,6 +51,7 @@ module.exports = {
       fields: [
         { name: 'Status', value: statusStr, inline: false },
         { name: 'Job', value: `${userRecord.jobTitle} (🪙${userRecord.jobSalary}/h)`, inline: false },
+        { name: 'Real Estate', value: `🏠 🪙${realEstateValue.toLocaleString()} (${properties.length} Props)`, inline: false },
         { name: 'Nation', value: userRecord.nation, inline: true },
         { name: 'Cult', value: userRecord.cult || 'None', inline: true },
         { name: 'Role', value: userRecord.role, inline: true },
