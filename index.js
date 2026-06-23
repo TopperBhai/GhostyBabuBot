@@ -49,36 +49,41 @@ const client = new Client({
 // A simple in-memory history map: userId -> array of messages
 const chatHistory = new Map();
 
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`👻 Ghosty Babu is online and logged in as ${client.user.tag}!`);
+
+  try {
+    await client.application.commands.set([
+      {
+        name: 'rizz',
+        description: 'Tag a user and Ghosty Babu will rizz them up with Hinglish pickup lines.',
+        options: [
+          {
+            name: 'user',
+            description: 'The person you want to rizz up',
+            type: 6, // USER type
+            required: true,
+          }
+        ]
+      }
+    ]);
+    console.log("Slash commands registered!");
+  } catch (err) {
+    console.error("Error registering slash commands:", err);
+  }
 });
 
-client.on('messageCreate', async (message) => {
-  // Ignore bots
-  if (message.author.bot) return;
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
 
-  // Check if it's a rizz command
-  const isRizzCommand = message.content.trim().startsWith('/rizz');
+  if (interaction.commandName === 'rizz') {
+    const targetUser = interaction.options.getUser('user');
 
-  // Check if bot is mentioned or if it's a DM
-  const isMentioned = message.mentions.has(client.user.id);
-  const isDM = message.channel.type === 1; // 1 = DM
-
-  if (!isMentioned && !isDM && !isRizzCommand) return;
-
-  if (isRizzCommand) {
-    const targetUser = message.mentions.users.find(u => u.id !== client.user.id);
-    if (!targetUser) {
-      return message.reply("bhai kisko rizz karu? mere alawa kisi ko tag toh kar 💀").catch(() => {});
+    if (targetUser.id === client.user.id) {
+      return interaction.reply({ content: "bhai kisko rizz karu? mere alawa kisi insaan ko tag kar 💀", ephemeral: true });
     }
 
-    let typingInterval;
-    try {
-      await message.channel.sendTyping();
-      typingInterval = setInterval(() => {
-        message.channel.sendTyping().catch(() => {});
-      }, 9000);
-    } catch (e) {}
+    await interaction.deferReply();
 
     try {
       const completion = await openai.chat.completions.create({
@@ -94,18 +99,26 @@ client.on('messageCreate', async (message) => {
 
       const reply = completion.choices[0]?.message?.content;
       if (reply) {
-        await message.channel.send(`<@${targetUser.id}> ${reply}`).catch(() => {});
+        await interaction.editReply(`<@${targetUser.id}> ${reply}`);
       } else {
-        await message.reply("bro my rizz module just crashed fr fr 💀").catch(() => {});
+        await interaction.editReply("bro my rizz module just crashed fr fr 💀");
       }
     } catch (error) {
       console.error("NVIDIA API Error:", error.message || error);
-      await message.reply("nah im too tired to rizz rn 💀 (API Error)").catch(() => {});
-    } finally {
-      if (typingInterval) clearInterval(typingInterval);
+      await interaction.editReply("nah im too tired to rizz rn 💀 (API Error)");
     }
-    return;
   }
+});
+
+client.on('messageCreate', async (message) => {
+  // Ignore bots
+  if (message.author.bot) return;
+
+  // Check if bot is mentioned or if it's a DM
+  const isMentioned = message.mentions.has(client.user.id);
+  const isDM = message.channel.type === 1; // 1 = DM
+
+  if (!isMentioned && !isDM) return;
 
   // Clean the message content by removing the bot mention
   const userText = message.content.replace(new RegExp(`<@!?${client.user.id}>`), '').trim();
