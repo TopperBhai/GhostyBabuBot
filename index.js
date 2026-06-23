@@ -111,6 +111,7 @@ client.on('interactionCreate', async (interaction) => {
 
   if (interaction.commandName === 'rizz' || interaction.commandName === 'flirt') {
     const targetUser = interaction.options.getUser('user');
+    const targetMember = interaction.options.getMember('user');
 
     if (targetUser.id === client.user.id) {
       const errorMsg = interaction.commandName === 'rizz' 
@@ -125,9 +126,18 @@ client.on('interactionCreate', async (interaction) => {
       ? "You are Ghosty Babu, an Indian Gen-Z teenager and a master of Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line for the user mentioned. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy."
       : "You are Ghosty Babu, a cheeky Indian Gen-Z teenager. Flirt with the user mentioned in natural, romantic yet funny Hinglish. Be playful and cheesy. CRITICAL RULE: Write ONLY in natural conversational Hinglish. Do NOT provide any English translation. Do NOT use quotation marks. Just give the pure Hinglish text. Keep it short (1-2 lines), very gen-z, use emojis.";
 
+    let targetName = targetUser.username;
+    let targetPronouns = "";
+
+    if (targetMember) {
+      targetName = targetMember.displayName || targetUser.username;
+      const roles = targetMember.roles.cache.filter(r => r.name.toLowerCase().includes('he/') || r.name.toLowerCase().includes('she/') || r.name.toLowerCase().includes('they/')).map(r => r.name).join(', ');
+      if (roles) targetPronouns = ` (Pronouns: ${roles})`;
+    }
+
     const userPrompt = interaction.commandName === 'rizz'
-      ? `Rizz up this user: ${targetUser.username}`
-      : `Flirt with this user: ${targetUser.username}`;
+      ? `Rizz up this user: ${targetName}${targetPronouns}`
+      : `Flirt with this user: ${targetName}${targetPronouns}`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -202,8 +212,21 @@ client.on('messageCreate', async (message) => {
   }
   const history = chatHistory.get(userId);
 
+  const member = message.member;
+  let nameToUse = message.author.username;
+  let pronouns = "";
+
+  if (member) {
+    nameToUse = member.displayName || message.author.username;
+    const roles = member.roles.cache.filter(r => r.name.toLowerCase().includes('he/') || r.name.toLowerCase().includes('she/') || r.name.toLowerCase().includes('they/')).map(r => r.name).join(', ');
+    if (roles) pronouns = `, Pronouns: ${roles}`;
+  }
+
+  const contextPrefix = `[User: ${nameToUse}${pronouns}]`;
+  const contentToPush = userText ? `${contextPrefix} ${userText}` : `${contextPrefix} (Sent an attachment)`;
+
   // Push user message to history
-  history.push({ role: 'user', content: userText || "(User sent an attachment)" });
+  history.push({ role: 'user', content: contentToPush });
 
   // Keep history short (last 20 messages)
   while (history.length > 20) history.shift();
