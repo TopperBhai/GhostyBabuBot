@@ -57,11 +57,55 @@ client.on('messageCreate', async (message) => {
   // Ignore bots
   if (message.author.bot) return;
 
+  // Check if it's a rizz command
+  const isRizzCommand = message.content.trim().startsWith('/rizz');
+
   // Check if bot is mentioned or if it's a DM
   const isMentioned = message.mentions.has(client.user.id);
   const isDM = message.channel.type === 1; // 1 = DM
 
-  if (!isMentioned && !isDM) return;
+  if (!isMentioned && !isDM && !isRizzCommand) return;
+
+  if (isRizzCommand) {
+    const targetUser = message.mentions.users.find(u => u.id !== client.user.id);
+    if (!targetUser) {
+      return message.reply("bhai kisko rizz karu? mere alawa kisi ko tag toh kar 💀").catch(() => {});
+    }
+
+    let typingInterval;
+    try {
+      await message.channel.sendTyping();
+      typingInterval = setInterval(() => {
+        message.channel.sendTyping().catch(() => {});
+      }, 9000);
+    } catch (e) {}
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "meta/llama-3.1-70b-instruct",
+        messages: [
+          { role: "system", content: "You are Ghosty Babu, a master of Gen-Z Hinglish rizz. Generate a smooth, funny, and slightly dramatic Hinglish pickup line or rizz message for the user mentioned. Keep it short (1-2 lines), very gen-z, use emojis, and don't be creepy." },
+          { role: "user", content: `Rizz up this user: ${targetUser.username}` }
+        ],
+        temperature: 0.8,
+        max_tokens: 80,
+        top_p: 1,
+      });
+
+      const reply = completion.choices[0]?.message?.content;
+      if (reply) {
+        await message.channel.send(`<@${targetUser.id}> ${reply}`).catch(() => {});
+      } else {
+        await message.reply("bro my rizz module just crashed fr fr 💀").catch(() => {});
+      }
+    } catch (error) {
+      console.error("NVIDIA API Error:", error.message || error);
+      await message.reply("nah im too tired to rizz rn 💀 (API Error)").catch(() => {});
+    } finally {
+      if (typingInterval) clearInterval(typingInterval);
+    }
+    return;
+  }
 
   // Clean the message content by removing the bot mention
   const userText = message.content.replace(new RegExp(`<@!?${client.user.id}>`), '').trim();
