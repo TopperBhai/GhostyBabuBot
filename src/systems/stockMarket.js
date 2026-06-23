@@ -3,13 +3,16 @@ const cron = require('node-cron');
 const Stock = require('../models/Stock');
 
 module.exports = (client) => {
-  // Run every hour to fluctuate prices
-  cron.schedule('0 * * * *', async () => {
+  // Run every 5 minutes to fluctuate prices rapidly
+  cron.schedule('*/5 * * * *', async () => {
     try {
       const stocks = await Stock.find();
       for (const s of stocks) {
-        // 5% chance to change trend
-        if (Math.random() < 0.05) {
+        // Save previous price for UI calculations
+        s.previousPrice = s.price;
+
+        // 15% chance to change trend (higher volatility)
+        if (Math.random() < 0.15) {
           const trends = ['BULL', 'BEAR', 'STABLE'];
           s.trend = trends[Math.floor(Math.random() * trends.length)];
         }
