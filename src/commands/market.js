@@ -48,11 +48,23 @@ module.exports = {
     
     if (sub === 'view') {
       const markets = await Market.find();
-      let msg = "🌍 **GhostVerse Global Market** 🌍\n\n";
+      
+      let desc = "**Global Commodity Prices (Supply & Demand)**\n\n";
       for (const m of markets) {
-        msg += `**${m.commodity}**\nPrice: 🪙${m.price}\nSupply: ${m.supply.toLocaleString()} | Demand: ${m.demand.toLocaleString()}\n\n`;
+        let icon = m.commodity === 'Food' ? '🍞' : m.commodity === 'Ore' ? '🪨' : m.commodity === 'Goods' ? '📦' : '🍔';
+        desc += `${icon} **${m.commodity}** — 🪙 **${m.price.toLocaleString()}**\n`;
+        desc += `└ \`Supply: ${m.supply.toLocaleString()} | Demand: ${m.demand.toLocaleString()}\`\n\n`;
       }
-      return interaction.reply({ content: msg });
+
+      const embed = {
+        color: 0x3498db,
+        title: "🌍 GhostVerse Global Market 🌍",
+        description: desc.trim(),
+        footer: { text: "Use /market buy or /market sell to trade" },
+        timestamp: new Date().toISOString()
+      };
+
+      return interaction.reply({ embeds: [embed] });
     }
 
     if (sub === 'sell') {
