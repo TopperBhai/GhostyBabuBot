@@ -47,7 +47,7 @@ module.exports = {
     if (sub === 'view') {
       const stocks = await Stock.find();
       
-      let stockFields = [];
+      let desc = "**Prices fluctuate every 5 minutes. Buy low, sell high!**\n\n";
       
       stocks.forEach(s => {
         let prev = s.previousPrice || s.price;
@@ -60,18 +60,14 @@ module.exports = {
         if (s.trend === 'BULL') { icon = '🟢'; arrow = '▲'; }
         if (s.trend === 'BEAR') { icon = '🔴'; arrow = '▼'; }
 
-        stockFields.push({
-          name: `${icon} ${s.name}`,
-          value: `🪙 **${Math.floor(s.price).toLocaleString()}** \n\`${arrow} ${percentStr}\` (${s.trend})`,
-          inline: true
-        });
+        // Clean line-by-line format: 🟢 **ShadowCorp** — 🪙 100 (▲ +0.95%)
+        desc += `${icon} **${s.name}** — 🪙 **${Math.floor(s.price).toLocaleString()}** \`(${arrow} ${percentStr})\`\n`;
       });
 
       const embed = {
-        color: 0x00ff00,
+        color: 0x2b2d31,
         title: "📈 GhostVerse Stock Exchange (GVSE) 📉",
-        description: "Prices fluctuate every 5 minutes. Buy low, sell high!",
-        fields: stockFields,
+        description: desc,
         footer: { text: "Use /stock buy or /stock sell" },
         timestamp: new Date().toISOString()
       };
