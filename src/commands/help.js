@@ -44,9 +44,6 @@ module.exports = {
           inline: false
         }
       ],
-      image: {
-        url: "https://i.imgur.com/eB4A2nI.png" // Colorful divider line
-      },
       footer: { text: "That's it! Start by doing /job apply right now! 🚀" }
     };
 

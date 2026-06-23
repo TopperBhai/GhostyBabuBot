@@ -87,9 +87,6 @@ module.exports = {
           inline: false 
         }
       ],
-      image: {
-        url: "https://i.imgur.com/8Q73hR9.png" // Adding a cool line banner or generic GhostVerse banner
-      },
       footer: { text: "GhostVerse OS v2.0 | Advanced Economy Simulation", icon_url: client.user.displayAvatarURL() },
       timestamp: new Date().toISOString()
     };
