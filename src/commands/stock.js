@@ -54,38 +54,27 @@ module.exports = {
       let totalValue = 0;
       let totalChange = 0;
 
-      let desc = "**Live from Wall Street (Updates Every Min!)** ⏱️\n\n";
-      
-      const stockIcons = {
-        'Microhard': '💻', 'Tasla': '🚗', 'Space Y': '🚀',
-        'Boogle': '🔍', 'Beta': '👓', 'HitCoin': '🪙',
-        'Pintel': '💾', 'WhiteRock': '🏦', 'AmmaZone': '📦'
-      };
+      let desc = "**Prices fluctuate every minute. Buy low, sell high!**\n\n";
       
       stocks.forEach(s => {
         let prev = s.previousPrice || s.price;
         let diff = s.price - prev;
         let percent = prev > 0 ? (diff / prev) * 100 : 0;
         
-        totalValue += s.price;
-        totalChange += percent;
-
-        let indicator = percent >= 0 ? '🟢' : '🔴';
         let percentStr = percent >= 0 ? `+${percent.toFixed(2)}%` : `${percent.toFixed(2)}%`;
         
-        let icon = stockIcons[s.name] || '📈';
+        let icon = '🟡';
+        let arrow = '➖';
+        if (s.trend === 'BULL') { icon = '🟢'; arrow = '▲'; }
+        if (s.trend === 'BEAR') { icon = '🔴'; arrow = '▼'; }
 
-        desc += `**${icon} ${s.name}**\n`;
-        desc += `└ \`🪙 ${Math.floor(s.price).toLocaleString()}\` | ${indicator} \`${percentStr}\`\n\n`;
+        // Clean line-by-line format: 🟢 **Microhard** — 🪙 100 (▲ +0.95%)
+        desc += `${icon} **${s.name}** — 🪙 **${Math.floor(s.price).toLocaleString()}** \`(${arrow} ${percentStr})\`\n`;
       });
-      
-      let indexPercent = totalChange / stocks.length;
-      let indexStr = indexPercent >= 0 ? `+${indexPercent.toFixed(2)}%` : `${indexPercent.toFixed(2)}%`;
-      let marketTrend = indexPercent >= 0 ? '🟢 BULL MARKET' : '🔴 BEAR MARKET';
 
       const embed = {
-        color: indexPercent >= 0 ? 0x00ff00 : 0xff0000,
-        title: `📊 GhostVerse Stock Exchange (GVSE) \n${marketTrend} (Index: ${indexStr})`,
+        color: 0x2b2d31,
+        title: "📈 GhostVerse Stock Exchange (GVSE) 📉",
         description: desc,
         footer: { text: "Use /stock buy or /stock sell" },
         timestamp: new Date().toISOString()
