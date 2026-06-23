@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   nation: { type: String, default: 'None' },
   role: { type: String, default: 'Citizen' },
   inventory: { type: Array, default: [] },
-  portfolio: { type: Object, default: {} } // { stockName: sharesOwned }
+  portfolio: { type: Object, default: {} },
+  jailUntil: { type: Date, default: null }
 });
 module.exports = mongoose.model('User', userSchema);

@@ -75,6 +75,7 @@ for (const file of commandFiles) {
 require('./src/systems/ghostLeaks')(client);
 require('./src/systems/stockMarket')(client);
 require('./src/systems/disasters')(client);
+require('./src/systems/newspaper')(client);
 
 if (!process.env.DISCORD_BOT_TOKEN || !process.env.NVIDIA_API_KEY) {
   console.error("CRITICAL: Missing DISCORD_BOT_TOKEN or NVIDIA_API_KEY in .env");
