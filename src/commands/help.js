@@ -1,41 +1,53 @@
 module.exports = {
   data: {
     name: 'help',
-    description: 'See all the things Ghosty Babu can do.',
+    description: 'A super simple guide to everything Ghosty Babu can do! (Baby Friendly 🍼)',
     options: []
   },
   async execute(interaction, client) {
     const embed = {
-      color: 0x992d22,
-      title: "👻 GhostVerse Official Guide",
-      description: "Welcome to the living, breathing economy of the GhostVerse. Earn coins by **chatting** or sitting in **Voice Channels**.",
+      color: 0x00FFBB, // Bright friendly color
+      author: {
+        name: "🍼 GhostVerse for Dummies (Super Simple Guide)",
+        icon_url: client.user.displayAvatarURL()
+      },
+      description: "Welcome! Here is literally everything you can do, explained so simply that even a baby could understand it. \n\n**Free Money:** Just chat in the server or sit in a Voice Channel to passively earn Ghost Coins! 🪙",
       fields: [
         {
-          name: "🎉 General & Fun",
-          value: "`/rizz`, `/flirt`, `/roast`, `/bhavishyavani`\n`/catch` (Catch rare ghosts when they spawn!)\n`/inventory` (View your ghosts)"
+          name: "🙋‍♂️ 1. WHO AM I?",
+          value: "👉 **`/profile`** - See your money, your job, your items, and if you are in jail.\n👉 **`/inventory`** - Look inside your bag to see items you own.\n👉 **`/leaderboard`** - Find out who is the richest or strongest player.",
+          inline: false
         },
         {
-          name: "🌍 Nations & Profiles",
-          value: "`/profile` - View your Net Worth, Nation, Cult, and Artifacts.\n`/join` - Pledge allegiance to a Nation.\n`/nation` - View a Nation's live stats.\n`/leaderboard` - See the top players, nations, and cults."
+          name: "💼 2. HOW TO MAKE MONEY (Legal & Safe)",
+          value: "👉 **`/job apply`** - Get a normal job (like Police or Doctor) and get paid every hour.\n👉 **`/business buy`** - Buy a Farm or Factory. They automatically make stuff every hour!\n👉 **`/market sell`** - Sell the stuff your business made for big profits.\n👉 **`/realestate buy`** - Buy a house and people will pay you rent every hour.\n👉 **`/stock buy`** - Gamble your money in the stock market.",
+          inline: false
         },
         {
-          name: "dY', Capitalism & Economy",
-          value: "`/job list|apply|quit` - Get a job and earn hourly salary.\n`/business buy|collect|inventory` - Build Farms, Factories, etc.\n`/realestate view|buy|collect` - Buy apartments and mansions for rent.\n`/market view|buy|sell` - Trade commodities on the global market.\n`/stock view|buy|sell` - Invest in the volatile Stock Market."
+          name: "😈 3. HOW TO MAKE MONEY (Illegal & Dangerous)",
+          value: "👉 **`/heist`** - Try to rob the bank! If you win, you get rich. If you lose, you go to PRISON.\n👉 **`/blackmarket buy`** - Buy illegal items in secret to help you win heists.",
+          inline: false
         },
         {
-          name: "🏛️ Federal Government",
-          value: "`/government treasury` - View the State Treasury and Tax Rates.\n`/government vote` - Vote for President.\n`/government policy` - (President Only) Set the tax rate."
+          name: "🏛️ 4. POLITICS & NATIONS",
+          value: "👉 **`/join`** - Join a team (Nation) like *Pookie Cult* or *Kaleshi Kingdom*.\n👉 **`/war declare`** - Attack another Nation to steal their money!\n👉 **`/government vote`** - Vote for someone to become the President.\n👉 **`/government policy`** - If you are President, you can raise or lower taxes for everyone!",
+          inline: false
         },
         {
-          name: "dY?'??~,? The Underworld",
-          value: "`/heist` - Rob the bank for huge payouts (Failure means PRISON).\n`/blackmarket buy` - Purchase illegal tools and Fake Passports.\n`/war declare` - Attack rival Nations to steal 10% of their treasury!"
+          name: "🔮 5. MAGIC & GOD MODE",
+          value: "👉 **`/cult found`** - Start your own religion! People can join it to get special superpowers.\n👉 **`/mint`** - Pay 1 Million coins to create a custom legendary item just for you.\n👉 **`/catch`** - If a wild ghost appears in chat, use this to catch it!",
+          inline: false
         },
         {
-          name: "👑 God Mode",
-          value: "`/cult found|join|info` - Start a religion to give your followers passive buffs.\n`/mint` - Spend 🪙1M to forge a Custom Artifact for your profile."
+          name: "😂 6. JUST FOR FUN (AI CHAT)",
+          value: "👉 **`/rizz`** - Tag someone and I will hit on them.\n👉 **`/flirt`** - Tag someone and I will flirt with them.\n👉 **`/roast`** - Tag someone and I will brutally insult them.\n👉 **`/bhavishyavani`** - Ask me a question about your future and I'll predict it.",
+          inline: false
         }
       ],
-      footer: { text: "Survive. Thrive. Conquer." }
+      image: {
+        url: "https://i.imgur.com/eB4A2nI.png" // Colorful divider line
+      },
+      footer: { text: "That's it! Start by doing /job apply right now! 🚀" }
     };
 
     return interaction.reply({ embeds: [embed] });
