@@ -35,11 +35,17 @@ module.exports = {
     }
     if (artifactsStr === "") artifactsStr = "None";
 
+    let statusStr = 'Free Citizen';
+    if (userRecord.jailUntil && userRecord.jailUntil > new Date()) {
+      statusStr = `🚨 Jailed until ${userRecord.jailUntil.toLocaleString()}`;
+    }
+
     const embed = {
       color: 0x2b2d31,
       title: `${targetUser.username}'s Profile`,
       thumbnail: { url: targetUser.displayAvatarURL() },
       fields: [
+        { name: 'Status', value: statusStr, inline: false },
         { name: 'Nation', value: userRecord.nation, inline: true },
         { name: 'Cult', value: userRecord.cult || 'None', inline: true },
         { name: 'Role', value: userRecord.role, inline: true },
