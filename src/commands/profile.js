@@ -39,27 +39,59 @@ module.exports = {
     }
     if (artifactsStr === "") artifactsStr = "None";
 
-    let statusStr = 'Free Citizen';
+    let statusStr = '🟢 Free Citizen';
     if (userRecord.jailUntil && userRecord.jailUntil > new Date()) {
-      statusStr = `🚨 Jailed until ${userRecord.jailUntil.toLocaleString()}`;
+      const unixJail = Math.floor(userRecord.jailUntil.getTime() / 1000);
+      statusStr = `🚨 **JAILED** (Releases <t:${unixJail}:R>)`;
     }
 
+    const netWorth = userRecord.wallet + realEstateValue; // Could add more later
+
     const embed = {
-      color: 0x2b2d31,
-      title: `${targetUser.username}'s Profile`,
-      thumbnail: { url: targetUser.displayAvatarURL() },
+      color: 0xFFD700, // Gold color for premium feel
+      author: {
+        name: `${targetUser.username}'s GhostVerse Profile`,
+        icon_url: targetUser.displayAvatarURL({ dynamic: true })
+      },
+      description: `**Total Net Worth:** 🪙 **${netWorth.toLocaleString()}**\n━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      thumbnail: { url: targetUser.displayAvatarURL({ dynamic: true, size: 512 }) },
       fields: [
-        { name: 'Status', value: statusStr, inline: false },
-        { name: 'Job', value: `${userRecord.jobTitle} (🪙${userRecord.jobSalary}/h)`, inline: false },
-        { name: 'Real Estate', value: `🏠 🪙${realEstateValue.toLocaleString()} (${properties.length} Props)`, inline: false },
-        { name: 'Nation', value: userRecord.nation, inline: true },
-        { name: 'Cult', value: userRecord.cult || 'None', inline: true },
-        { name: 'Role', value: userRecord.role, inline: true },
-        { name: 'Businesses', value: `🏢 ${bizCount}`, inline: true },
-        { name: 'Ghost Coins', value: `🪙 ${userRecord.wallet.toLocaleString()}`, inline: false },
-        { name: 'Stock Portfolio', value: portfolioStr, inline: false },
-        { name: 'Custom Artifacts', value: artifactsStr, inline: false },
-      ]
+        { 
+          name: '🛂 IDENTIFICATION', 
+          value: `**Status:** ${statusStr}\n**Nation:** ${userRecord.nation !== 'None' ? `🚩 ${userRecord.nation}` : 'None'}\n**Cult:** ${userRecord.cult !== 'None' ? `🔮 ${userRecord.cult}` : 'None'}\n**Role:** ${userRecord.role}`, 
+          inline: false 
+        },
+        { 
+          name: '💼 CAREER', 
+          value: `**Job:** ${userRecord.jobTitle}\n**Salary:** 🪙${userRecord.jobSalary}/h`, 
+          inline: true 
+        },
+        { 
+          name: '🏢 BUSINESS EMPIRE', 
+          value: `**LLCs Owned:** ${bizCount}\n**Real Estate:** ${properties.length} Props (🪙${realEstateValue.toLocaleString()})`, 
+          inline: true 
+        },
+        { 
+          name: '💰 LIQUID ASSETS', 
+          value: `**Wallet:** 🪙 ${userRecord.wallet.toLocaleString()}`, 
+          inline: false 
+        },
+        { 
+          name: '📈 STOCK PORTFOLIO', 
+          value: `\`\`\`\n${portfolioStr}\n\`\`\``, 
+          inline: false 
+        },
+        { 
+          name: '💎 RARE ARTIFACTS', 
+          value: artifactsStr, 
+          inline: false 
+        }
+      ],
+      image: {
+        url: "https://i.imgur.com/8Q73hR9.png" // Adding a cool line banner or generic GhostVerse banner
+      },
+      footer: { text: "GhostVerse OS v2.0 | Advanced Economy Simulation", icon_url: client.user.displayAvatarURL() },
+      timestamp: new Date().toISOString()
     };
 
     await interaction.reply({ embeds: [embed] });

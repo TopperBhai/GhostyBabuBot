@@ -15,7 +15,8 @@ module.exports = {
 
     // Check if Jailed
     if (user.jailUntil && user.jailUntil > new Date()) {
-      return interaction.reply({ content: `You are in PRISON until ${user.jailUntil.toLocaleString()}. Use /blackmarket or bribe someone to get out.`, ephemeral: true });
+      const unixJail = Math.floor(user.jailUntil.getTime() / 1000);
+      return interaction.reply({ content: `You are in PRISON! Releases <t:${unixJail}:R> (<t:${unixJail}:f>). Use /blackmarket or bribe someone to get out.`, ephemeral: true });
     }
 
     // Cooldown check via Redis
@@ -63,7 +64,8 @@ module.exports = {
       user.wallet -= fine;
 
       await user.save();
-      return interaction.reply(`🚨 **BUSTED!** The SWAT team breached the bank. You lost 🪙**${fine.toLocaleString()}** and have been sentenced to **PRISON** until ${releaseDate.toLocaleString()}.`);
+      const unixRelease = Math.floor(releaseDate.getTime() / 1000);
+      return interaction.reply(`🚨 **BUSTED!** The SWAT team breached the bank. You lost 🪙**${fine.toLocaleString()}** and have been sentenced to **PRISON**. You will be released <t:${unixRelease}:R>.`);
     }
   }
 };
