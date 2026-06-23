@@ -32,11 +32,72 @@ module.exports = {
         name: 'collect',
         description: 'Collect passive revenue from your businesses',
         type: 1
+const User = require('../models/User');
+const Business = require('../models/Business');
+
+const BIZ_CONFIG = {
+  'Mine': { cost: 5000, baseIncome: 100, collectInterval: 1 * 60 * 60 * 1000 }, // 1 hr
+  'Factory': { cost: 20000, baseIncome: 600, collectInterval: 3 * 60 * 60 * 1000 }, // 3 hr
+  'Bank': { cost: 100000, baseIncome: 5000, collectInterval: 12 * 60 * 60 * 1000 }, // 12 hr
+  'Casino': { cost: 250000, baseIncome: 15000, collectInterval: 24 * 60 * 60 * 1000, risk: true } // 24 hr
+};
+
+module.exports = {
+  data: {
+    name: 'business',
+    description: 'Capitalism awaits. Buy, upgrade, and collect from your businesses.',
+    options: [
+      {
+        name: 'buy',
+        description: 'Buy a new business',
+        type: 1,
+        options: [
+          {
+            name: 'type',
+            description: 'Type of business',
+            type: 3,
+            required: true,
+            choices: Object.keys(BIZ_CONFIG).map(k => ({ name: k + ` (🪙${BIZ_CONFIG[k].cost})`, value: k }))
+          }
+        ]
+      },
+      {
+        name: 'collect',
+        description: 'Collect passive revenue from your businesses',
+        type: 1
       },
       {
         name: 'list',
         description: 'View your owned businesses',
         type: 1
+      },
+      {
+        name: 'rename',
+        description: 'Rename your business to a custom LLC name (Costs 🪙1,000)',
+        type: 1,
+        options: [
+          { name: 'index', description: 'The index number of the business from /business list', type: 4, required: true },
+          { name: 'name', description: 'The new custom name for your LLC', type: 3, required: true }
+        ]
+      },
+      {
+        name: 'hire',
+        description: 'Offer a job to a player at your company.',
+        type: 1,
+        options: [
+          { name: 'index', description: 'Business index', type: 4, required: true },
+          { name: 'user', description: 'Player to hire', type: 6, required: true },
+          { name: 'title', description: 'Job Title', type: 3, required: true },
+          { name: 'salary', description: 'Hourly Salary (🪙)', type: 4, required: true }
+        ]
+      },
+      {
+        name: 'fire',
+        description: 'Fire an employee from your company.',
+        type: 1,
+        options: [
+          { name: 'user', description: 'Player to fire', type: 6, required: true }
+        ]
       }
     ]
   },
@@ -65,7 +126,8 @@ module.exports = {
 
       let desc = `🏢 **Your Empire:**\n\n`;
       businesses.forEach((b, i) => {
-        desc += `**${i+1}. ${b.type} (Lvl ${b.level})**\n`;
+        const displayName = b.customName ? `${b.customName} (${b.type})` : b.type;
+        desc += `**${i+1}. ${displayName} (Lvl ${b.level})**\n`;
       });
       return interaction.reply(desc);
     }
@@ -93,17 +155,18 @@ module.exports = {
           if (hasCapitalistBuff) income = Math.floor(income * 1.2); // +20%
           
           
+          const displayName = b.customName || b.type;
           if (config.risk) {
             // Casino can lose money
             if (Math.random() > 0.6) {
               income = -Math.floor(income / 2);
-              msg += `🎰 ${b.type}: **Lost** 🪙${Math.abs(income)}\n`;
+              msg += `🎰 ${displayName}: **Lost** 🪙${Math.abs(income)}\n`;
             } else {
               income = Math.floor(income * 1.5);
-              msg += `🎰 ${b.type}: **Jackpot!** 🪙${income}\n`;
+              msg += `🎰 ${displayName}: **Jackpot!** 🪙${income}\n`;
             }
           } else {
-            msg += `🏢 ${b.type}: +🪙${income}\n`;
+            msg += `🏢 ${displayName}: +🪙${income}\n`;
           }
 
           totalCollected += income;
@@ -120,6 +183,86 @@ module.exports = {
       }
 
       return interaction.reply(msg + `\n**Net Change:** 🪙${totalCollected}`);
+    }
+
+    if (sub === 'rename') {
+      const index = interaction.options.getInteger('index') - 1;
+      const newName = interaction.options.getString('name');
+
+      const user = await User.findOne({ discordId });
+      if (!user || user.wallet < 1000) {
+        return interaction.reply({ content: "You need 🪙1,000 to file LLC renaming paperwork.", ephemeral: true });
+      }
+
+      const businesses = await Business.find({ ownerId: discordId });
+      if (index < 0 || index >= businesses.length) {
+        return interaction.reply({ content: "Invalid business index. Check `/business list`.", ephemeral: true });
+      }
+
+      const b = businesses[index];
+      b.customName = newName;
+      await b.save();
+
+      user.wallet -= 1000;
+      await user.save();
+
+      return interaction.reply(`📝 **LLC Registered!** Your ${b.type} is now officially named **${newName}**!`);
+    }
+
+    if (sub === 'hire') {
+      const index = interaction.options.getInteger('index') - 1;
+      const targetUser = interaction.options.getUser('user');
+      const title = interaction.options.getString('title');
+      const salary = interaction.options.getInteger('salary');
+
+      if (salary < 1) return interaction.reply({ content: "Salary must be at least 🪙1.", ephemeral: true });
+
+      const businesses = await Business.find({ ownerId: discordId });
+      if (index < 0 || index >= businesses.length) return interaction.reply({ content: "Invalid business index.", ephemeral: true });
+      
+      const b = businesses[index];
+      const displayName = b.customName || b.type;
+
+      // Check if target user exists
+      let targetRecord = await User.findOne({ discordId: targetUser.id });
+      if (!targetRecord) return interaction.reply({ content: "That user doesn't exist in the GhostVerse.", ephemeral: true });
+      if (targetRecord.employerId !== 'None' && targetRecord.employerId !== 'State') {
+        return interaction.reply({ content: "They are already employed by another company.", ephemeral: true });
+      }
+
+      // To keep things simple without Buttons for now, we just force-hire them (like a draft).
+      // In a full MMO, this would be an offer system.
+      targetRecord.jobTitle = title;
+      targetRecord.jobSalary = salary;
+      targetRecord.employerId = b._id.toString();
+      await targetRecord.save();
+
+      return interaction.reply(`🤝 **YOU'RE HIRED!** <@${targetUser.id}> has been hired by **${displayName}** as a **${title}** making 🪙${salary}/hour!`);
+    }
+
+    if (sub === 'fire') {
+      const targetUser = interaction.options.getUser('user');
+      let targetRecord = await User.findOne({ discordId: targetUser.id });
+
+      if (!targetRecord || targetRecord.employerId === 'None' || targetRecord.employerId === 'State') {
+        return interaction.reply({ content: "They don't work for a player company.", ephemeral: true });
+      }
+
+      // Check if the caller actually owns the business they work for
+      const b = await Business.findById(targetRecord.employerId);
+      if (!b || b.ownerId !== discordId) {
+        return interaction.reply({ content: "You do not own the company they work for!", ephemeral: true });
+      }
+
+      const oldTitle = targetRecord.jobTitle;
+      const displayName = b.customName || b.type;
+
+      targetRecord.jobTitle = 'Unemployed';
+      targetRecord.jobSalary = 0;
+      targetRecord.employerId = 'None';
+      await targetRecord.save();
+
+      return interaction.reply(`🥾 **YOU'RE FIRED!** <@${targetUser.id}> was fired from **${displayName}**.`);
     }
   }
 };

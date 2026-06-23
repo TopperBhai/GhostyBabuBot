@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const User = require('../models/User');
+const Business = require('../models/Business');
 
 module.exports = (client) => {
   // Global Tick Engine: Runs at the start of every hour
@@ -12,11 +13,37 @@ module.exports = (client) => {
       
       let totalPaidOut = 0;
       for (const worker of workers) {
-        // Here we could check if the employer is a Player Company and deduct from their balance.
-        // For now, if employerId === 'State', we just print money.
-        worker.wallet += worker.jobSalary;
-        totalPaidOut += worker.jobSalary;
-        await worker.save();
+        if (worker.employerId === 'State') {
+          worker.wallet += worker.jobSalary;
+          totalPaidOut += worker.jobSalary;
+          await worker.save();
+        } else if (worker.employerId !== 'None') {
+          // Employee works for a Player Company
+          const biz = await Business.findById(worker.employerId);
+          if (biz) {
+            const owner = await User.findOne({ discordId: biz.ownerId });
+            if (owner && owner.wallet >= worker.jobSalary) {
+              // Transfer money
+              owner.wallet -= worker.jobSalary;
+              worker.wallet += worker.jobSalary;
+              totalPaidOut += worker.jobSalary;
+              await owner.save();
+              await worker.save();
+            } else {
+              // Employer is broke! Fire the employee.
+              worker.jobTitle = 'Unemployed';
+              worker.jobSalary = 0;
+              worker.employerId = 'None';
+              await worker.save();
+            }
+          } else {
+            // Business no longer exists
+            worker.jobTitle = 'Unemployed';
+            worker.jobSalary = 0;
+            worker.employerId = 'None';
+            await worker.save();
+          }
+        }
       }
 
       console.log(`✅ [TICK ENGINE] Paid out 🪙${totalPaidOut} in total salaries to ${workers.length} workers.`);
