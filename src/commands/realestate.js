@@ -3,10 +3,10 @@ const Property = require('../models/Property');
 const State = require('../models/State');
 
 const PROPERTY_TYPES = {
-  'Apartment': { price: 5000, rent: 100, collectInterval: 3600000 }, // 1 hour
-  'Mansion': { price: 50000, rent: 1500, collectInterval: 14400000 }, // 4 hours
-  'Office Building': { price: 200000, rent: 8000, collectInterval: 28800000 }, // 8 hours
-  'Penthouse': { price: 1000000, rent: 50000, collectInterval: 86400000 } // 24 hours
+  'Apartment': { price: 1000, rent: 25, collectInterval: 43200000 }, // 12 hours
+  'Mansion': { price: 10000, rent: 300, collectInterval: 86400000 }, // 24 hours
+  'Office Building': { price: 40000, rent: 1200, collectInterval: 86400000 }, // 24 hours
+  'Penthouse': { price: 150000, rent: 5000, collectInterval: 86400000 } // 24 hours
 };
 
 module.exports = {

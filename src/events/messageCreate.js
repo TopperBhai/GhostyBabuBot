@@ -12,8 +12,8 @@ module.exports = {
       const cooldownKey = `cooldown_msg_${message.author.id}`;
       const isCooldown = await client.redis.get(cooldownKey);
       if (!isCooldown) {
-        await client.redis.set(cooldownKey, '1', 'EX', 60); // 60s cooldown
-        const coinsEarned = Math.floor(Math.random() * 5) + 1; // 1-5 coins
+        await client.redis.set(cooldownKey, '1', 'EX', 300); // 5 min cooldown
+        const coinsEarned = 1; // 1 coin per 5 mins active chat
         User.findOneAndUpdate(
           { discordId: message.author.id },
           { $inc: { wallet: coinsEarned } },

@@ -1,14 +1,14 @@
 const User = require('../models/User');
 
 const JOBS = [
-  { title: 'Taxi Driver', salary: 100, type: 'Legal', req: 'None' },
-  { title: 'Police Officer', salary: 300, type: 'Legal', req: 'None' },
-  { title: 'Doctor', salary: 800, type: 'Legal', req: 'None' },
-  { title: 'Journalist', salary: 400, type: 'Legal', req: 'None' },
-  { title: 'Drug Dealer', salary: 500, type: 'Illegal', req: 'None' },
-  { title: 'Smuggler', salary: 1200, type: 'Illegal', req: 'None' },
-  { title: 'Mafia Member', salary: 2000, type: 'Illegal', req: 'None' },
-  { title: 'Assassin', salary: 2500, type: 'Illegal', req: 'None' } // High risk
+  { title: 'Taxi Driver', salary: 15, type: 'Legal', req: 'None' },
+  { title: 'Police Officer', salary: 28, type: 'Legal', req: 'None' },
+  { title: 'Journalist', salary: 35, type: 'Legal', req: 'None' },
+  { title: 'Doctor', salary: 75, type: 'Legal', req: 'None' },
+  { title: 'Drug Dealer', salary: 45, type: 'Illegal', req: 'None' },
+  { title: 'Smuggler', salary: 90, type: 'Illegal', req: 'None' },
+  { title: 'Mafia Member', salary: 140, type: 'Illegal', req: 'None' },
+  { title: 'Assassin', salary: 200, type: 'Illegal', req: 'None' } // High risk
 ];
 
 module.exports = {

@@ -2,12 +2,12 @@ const User = require('../models/User');
 const Business = require('../models/Business');
 
 const BIZ_CONFIG = {
-  'Farm': { cost: 5000, type: 'Producer', maxSalary: 500 },
-  'Mine': { cost: 10000, type: 'Producer', maxSalary: 1000 },
-  'Factory': { cost: 50000, type: 'Manufacturer', maxSalary: 2000 },
-  'Restaurant': { cost: 75000, type: 'Manufacturer', maxSalary: 2500 },
-  'Casino': { cost: 250000, type: 'Entertainment', maxSalary: 5000 },
-  'Media Company': { cost: 500000, type: 'Influence', maxSalary: 10000 }
+  'Farm': { cost: 2500, type: 'Producer', maxSalary: 30 },
+  'Mine': { cost: 5000, type: 'Producer', maxSalary: 50 },
+  'Factory': { cost: 15000, type: 'Manufacturer', maxSalary: 80 },
+  'Restaurant': { cost: 25000, type: 'Manufacturer', maxSalary: 100 },
+  'Casino': { cost: 100000, type: 'Entertainment', maxSalary: 250 },
+  'Media Company': { cost: 250000, type: 'Influence', maxSalary: 500 }
 };
 
 module.exports = {
@@ -26,12 +26,12 @@ module.exports = {
             type: 3,
             required: true,
             choices: [
-              { name: 'Farm (🪙5000)', value: 'Farm' },
-              { name: 'Mine (🪙10000)', value: 'Mine' },
-              { name: 'Factory (🪙50000)', value: 'Factory' },
-              { name: 'Restaurant (🪙75000)', value: 'Restaurant' },
-              { name: 'Casino (🪙250000)', value: 'Casino' },
-              { name: 'Media Company (🪙500000)', value: 'Media Company' }
+              { name: 'Farm (🪙2500)', value: 'Farm' },
+              { name: 'Mine (🪙5000)', value: 'Mine' },
+              { name: 'Factory (🪙15000)', value: 'Factory' },
+              { name: 'Restaurant (🪙25000)', value: 'Restaurant' },
+              { name: 'Casino (🪙100000)', value: 'Casino' },
+              { name: 'Media Company (🪙250000)', value: 'Media Company' }
             ]
           }
         ]

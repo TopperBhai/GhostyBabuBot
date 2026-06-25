@@ -5,9 +5,9 @@ const Market = require('../models/Market');
 const State = require('../models/State');
 
 module.exports = (client) => {
-  // Global Tick Engine: Runs every 10 minutes
-  cron.schedule('*/10 * * * *', async () => {
-    console.log("🕒 [TICK ENGINE] Processing every 10 mins (salaries, production, rent)...");
+  // Global Tick Engine: Runs exactly once per hour
+  cron.schedule('0 * * * *', async () => {
+    console.log("🕒 [TICK ENGINE] Processing hourly economy cycle (salaries, production, rent)...");
 
     try {
       // Find all users with a job paying a salary, who were active in the last 24 hours
@@ -98,8 +98,8 @@ module.exports = (client) => {
       // ==========================================
       // 3. NPC CONSUMER ECONOMY & PRICE CAPS
       // ==========================================
-      const MAX_PRICES = { 'Food': 100, 'Ore': 200, 'Goods': 1000, 'Meals': 500 };
-      const MIN_PRICES = { 'Food': 5, 'Ore': 10, 'Goods': 50, 'Meals': 25 };
+      const MAX_PRICES = { 'Food': 25, 'Ore': 50, 'Goods': 120, 'Meals': 80 };
+      const MIN_PRICES = { 'Food': 2, 'Ore': 5, 'Goods': 20, 'Meals': 10 };
 
       const markets = await Market.find();
       for (const m of markets) {

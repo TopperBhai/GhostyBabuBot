@@ -23,7 +23,7 @@ module.exports = {
           const minutesSpent = Math.floor((Date.now() - joinTime) / 60000);
           
           if (minutesSpent > 0) {
-            const coinsEarned = minutesSpent * 10; // 10 coins per minute
+            const coinsEarned = minutesSpent * 1; // 1 coin per minute
             await User.findOneAndUpdate(
               { discordId: userId },
               { $inc: { wallet: coinsEarned } },
