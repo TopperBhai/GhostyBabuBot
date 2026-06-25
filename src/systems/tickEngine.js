@@ -96,8 +96,11 @@ module.exports = (client) => {
       console.log(`✅ [TICK ENGINE] Supply chains processed.`);
 
       // ==========================================
-      // 3. NPC CONSUMER ECONOMY
+      // 3. NPC CONSUMER ECONOMY & PRICE CAPS
       // ==========================================
+      const MAX_PRICES = { 'Food': 100, 'Ore': 200, 'Goods': 1000, 'Meals': 500 };
+      const MIN_PRICES = { 'Food': 5, 'Ore': 10, 'Goods': 50, 'Meals': 25 };
+
       const markets = await Market.find();
       for (const m of markets) {
         if (m.commodity === 'Meals' || m.commodity === 'Goods') {
@@ -107,18 +110,25 @@ module.exports = (client) => {
           
           // Adjust Price based on Scarcity
           if (m.supply === 0) {
-            m.price = Math.floor(m.price * 1.10); // +10% price
-            m.demand = Math.floor(m.demand * 1.05); // Demand grows
-          } else if (m.supply > m.demand * 2) {
-            m.price = Math.max(1, Math.floor(m.price * 0.90)); // -10% price
+            m.price = Math.floor(m.price * 1.02); // +2% price (gentle)
+            m.demand = Math.min(10000, Math.floor(m.demand * 1.02)); // Capped demand
+          } else if (m.supply > m.demand) {
+            m.price = Math.floor(m.price * 0.95); // -5% price
           }
         } else {
           // Raw materials (Food, Ore) decay slowly if not bought
-          m.supply = Math.max(0, m.supply - 100);
+          m.supply = Math.max(0, m.supply - 50);
         }
+
+        // Hard Price Caps (Anti-Hyperinflation)
+        const maxP = MAX_PRICES[m.commodity] || 500;
+        const minP = MIN_PRICES[m.commodity] || 10;
+        if (m.price > maxP) m.price = maxP;
+        if (m.price < minP) m.price = minP;
+
         await m.save();
       }
-      console.log(`✅ [TICK ENGINE] NPC Consumption processed.`);
+      console.log(`✅ [TICK ENGINE] NPC Consumption & Price Caps processed.`);
 
     } catch (err) {
       console.error("❌ [TICK ENGINE] Error processing salaries:", err);

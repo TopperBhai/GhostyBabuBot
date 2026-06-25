@@ -49,10 +49,16 @@ module.exports = {
     if (sub === 'view') {
       const markets = await Market.find();
       
-      let desc = "**Global Commodity Prices (Supply & Demand)**\n\n";
+      let desc = "**Global Commodity Exchange (Live Sentiment)** 📊\n\n";
       for (const m of markets) {
         let icon = m.commodity === 'Food' ? '🍞' : m.commodity === 'Ore' ? '🪨' : m.commodity === 'Goods' ? '📦' : '🍔';
-        desc += `${icon} **${m.commodity}** — 🪙 **${m.price.toLocaleString()}**\n`;
+        
+        let trend = '⚖️ NORMAL';
+        if (m.supply === 0) trend = '🔥 SOLD OUT (BOOMING)';
+        else if (m.supply < m.demand * 0.5) trend = '📈 HIGH DEMAND';
+        else if (m.supply > m.demand * 1.5) trend = '📉 SURPLUS (CRASH)';
+
+        desc += `${icon} **${m.commodity}** — 🪙 **${m.price.toLocaleString()}** \`[${trend}]\`\n`;
         desc += `└ \`Supply: ${m.supply.toLocaleString()} | Demand: ${m.demand.toLocaleString()}\`\n\n`;
       }
 
