@@ -44,6 +44,16 @@ module.exports = {
     }
     const history = client.chatHistory.get(userId);
 
+    // RAM Leak Protection: Evict inactive chat logs
+    if (!client.chatSweepTimer) {
+      client.chatSweepTimer = setInterval(() => {
+        if (client.chatHistory.size > 200) {
+          client.chatHistory.clear();
+          console.log('🧹 [MEMORY SWEEP] Purged AI chat history cache to prevent RAM overflow.');
+        }
+      }, 30 * 60 * 1000); // Check every 30 mins
+    }
+
     const member = message.member;
     let nameToUse = message.author.username;
     let pronouns = "";

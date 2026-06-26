@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require('discord.js');
 const User = require('../models/User');
 
 module.exports = {
@@ -16,10 +17,13 @@ module.exports = {
       if (ttl > 0) {
         const hours = Math.floor(ttl / 3600);
         const mins = Math.floor((ttl % 3600) / 60);
-        return interaction.reply({
-          content: `⏳ You have already collected your daily stipend. Try again in **${hours}h ${mins}m**.`,
-          ephemeral: true
-        });
+        const cdEmbed = new EmbedBuilder()
+          .setColor('#FF3366')
+          .setTitle('⏳ Relief Already Collected')
+          .setDescription(`You have already claimed your daily government check.\n\n**Next Claim Available:** in **${hours}h ${mins}m**`)
+          .setFooter({ text: 'City Treasury Department' });
+
+        return interaction.reply({ embeds: [cdEmbed], ephemeral: true });
       }
       await client.redis.set(cdKey, '1', 'EX', 86400);
     }
@@ -33,6 +37,17 @@ module.exports = {
     user.wallet += reward;
     await user.save();
 
-    return interaction.reply(`🏛️ **GOVERNMENT RELIEF:** You collected your daily citizen stipend of **🪙${reward}**! Current cash: **🪙${user.wallet.toLocaleString()}**.\n💡 *Tip: Use \`/work\` every 30 minutes for extra side income!*`);
+    const successEmbed = new EmbedBuilder()
+      .setColor('#00FF88')
+      .setTitle('🏛️ Daily Relief Deposited')
+      .setDescription(`The City Treasury has transferred **🪙${reward} Ghost Coins** directly to your cash wallet.`)
+      .addFields(
+        { name: '💵 Total Cash', value: `🪙 **${user.wallet.toLocaleString()}**`, inline: true },
+        { name: '💡 Pro-Tip', value: 'Use `/work` every 30 mins!', inline: true }
+      )
+      .setTimestamp()
+      .setFooter({ text: 'GhostVerse Economic Bureau', iconURL: interaction.user.displayAvatarURL() });
+
+    return interaction.reply({ embeds: [successEmbed] });
   }
 };

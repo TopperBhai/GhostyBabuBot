@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require('discord.js');
 const User = require('../models/User');
 
 const SIDE_GIGS = [
@@ -27,10 +28,13 @@ module.exports = {
       if (ttl > 0) {
         const mins = Math.floor(ttl / 60);
         const secs = ttl % 60;
-        return interaction.reply({
-          content: `🥵 You are exhausted from your last gig! Rest for **${mins}m ${secs}s** before working again.`,
-          ephemeral: true
-        });
+        const cdEmbed = new EmbedBuilder()
+          .setColor('#FF3366')
+          .setTitle('🥵 Worker Fatigue')
+          .setDescription(`You are exhausted from your last side-hustle.\n\n**Rest Required:** **${mins}m ${secs}s**`)
+          .setFooter({ text: 'City Labor Bureau' });
+
+        return interaction.reply({ embeds: [cdEmbed], ephemeral: true });
       }
       await client.redis.set(cdKey, '1', 'EX', 1800);
     }
@@ -46,6 +50,17 @@ module.exports = {
     user.wallet += earnings;
     await user.save();
 
-    return interaction.reply(`🛠️ **SIDE HUSTLE:** ${gig} and earned **🪙${earnings}**! Wallet: **🪙${user.wallet.toLocaleString()}**.`);
+    const workEmbed = new EmbedBuilder()
+      .setColor('#00AAFF')
+      .setTitle('🛠️ Side-Gig Shift Done')
+      .setDescription(`**${gig}**!`)
+      .addFields(
+        { name: '💵 Payment Received', value: `+ 🪙 **${earnings}**`, inline: true },
+        { name: '💰 Total Wallet', value: `🪙 **${user.wallet.toLocaleString()}**`, inline: true }
+      )
+      .setTimestamp()
+      .setFooter({ text: 'GhostVerse Gig Economy', iconURL: interaction.user.displayAvatarURL() });
+
+    return interaction.reply({ embeds: [workEmbed] });
   }
 };

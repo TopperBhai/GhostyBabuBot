@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const businessSchema = new mongoose.Schema({
-  ownerId: { type: String, required: true },
+  ownerId: { type: String, required: true, index: true },
   type: { type: String, required: true }, // Mine, Factory, Bank, Casino
   customName: { type: String, default: null },
   level: { type: Number, default: 1 },

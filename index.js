@@ -104,6 +104,24 @@ require('./src/systems/disasters')(client);
 require('./src/systems/newspaper')(client);
 require('./src/systems/tickEngine')(client);
 
+// ==========================================
+// ENTERPRISE ANTI-CRASH & PROCESS PROTECTION
+// ==========================================
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🛡️ [ANTI-CRASH] Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err, origin) => {
+  console.error('🛡️ [ANTI-CRASH] Uncaught Exception:', err);
+});
+
+process.on('SIGINT', async () => {
+  console.log('🔄 [SYSTEM] Graceful shutdown initiated...');
+  if (mongoose.connection.readyState === 1) await mongoose.disconnect();
+  if (client.redis) client.redis.quit();
+  process.exit(0);
+});
+
 if (!process.env.DISCORD_BOT_TOKEN || !process.env.NVIDIA_API_KEY) {
   console.error("CRITICAL: Missing DISCORD_BOT_TOKEN or NVIDIA_API_KEY in .env");
   process.exit(1);
