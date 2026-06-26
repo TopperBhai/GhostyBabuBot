@@ -9,7 +9,7 @@ module.exports = {
     options: [
       {
         name: 'found',
-        description: 'Spend 🪙500,000 to found a Cult.',
+        description: 'Spend 🪙50,000 to found a Cult.',
         type: 1,
         options: [
           { name: 'name', description: 'Cult Name', type: 3, required: true },
@@ -49,8 +49,8 @@ module.exports = {
       const name = interaction.options.getString('name');
       const perk = interaction.options.getString('perk');
 
-      if (user.wallet < 500000) {
-        return interaction.reply({ content: "You need 🪙500,000 Ghost Coins to found a cult.", ephemeral: true });
+      if (user.wallet < 50000) {
+        return interaction.reply({ content: "You need 🪙50,000 Ghost Coins to found a cult.", ephemeral: true });
       }
 
       const existing = await Cult.findOne({ name: new RegExp('^' + name + '$', 'i') });
@@ -64,7 +64,7 @@ module.exports = {
         }
       }
 
-      user.wallet -= 500000;
+      user.wallet -= 50000;
       user.cult = name;
       await user.save();
 

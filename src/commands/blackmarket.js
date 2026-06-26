@@ -2,8 +2,8 @@
 const User = require('../models/User');
 
 const BM_ITEMS = {
-  'Sabotage Kit': { cost: 15000, desc: 'Increases heist success chance by 20% (Consumable)' },
-  'Fake Passport': { cost: 50000, desc: 'Instantly clears your prison sentence (Consumable)' }
+  'Sabotage Kit': { cost: 500, desc: 'Increases heist success chance by 20% (Consumable)' },
+  'Fake Passport': { cost: 1500, desc: 'Instantly clears your prison sentence (Consumable)' }
 };
 
 module.exports = {

@@ -50,7 +50,7 @@ module.exports = {
     const isSuccess = Math.random() < successChance;
 
     if (isSuccess) {
-      const loot = Math.floor(Math.random() * 50000) + 10000; // 10k-60k
+      const loot = Math.floor(Math.random() * 2001) + 500; // 500-2500
       user.wallet += loot;
       await user.save();
       return interaction.reply(`🔫 **HEIST SUCCESSFUL!** You hacked the mainframe and stole 🪙**${loot.toLocaleString()}**. The police are clueless.`);

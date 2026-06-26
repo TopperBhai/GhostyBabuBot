@@ -11,8 +11,19 @@ module.exports = {
         name: "🍼 GhostVerse for Dummies (Super Simple Guide)",
         icon_url: client.user.displayAvatarURL()
       },
-      description: "Welcome to GhostVerse! Here is the complete list of everything you can do in the city.\n\n**Free Money:** Just chat in the server or sit in a Voice Channel to passively earn Ghost Coins! 🪙",
+      description: "Welcome to GhostVerse! Our economy is realistic & challenging. Follow this roadmap to go from broke to billionaire:\n\n" +
+                   "🔰 **STARTER ROADMAP (How to get rich):**\n" +
+                   "1️⃣ Run `/daily` (stipend) & `/work` (odd jobs) for quick starter cash.\n" +
+                   "2️⃣ Get a steady salaried job (`/job list` -> `/job apply`).\n" +
+                   "3️⃣ Buy real estate (`/realestate buy`) for passive daily rent.\n" +
+                   "4️⃣ Launch your own company (`/business buy`) & invest in Wall St (`/stock buy`).\n\n" +
+                   "💬 **Passive Income:** You also earn 🪙1 coin every 5 mins actively chatting or sitting in VC!",
       fields: [
+        {
+          name: "⚡ QUICK CASH (STARTER COMMANDS)",
+          value: "`daily` `work`",
+          inline: false
+        },
         {
           name: "👤 BASIC & ECONOMY",
           value: "`profile` `inventory` `leaderboard` `bank` `pay`",
