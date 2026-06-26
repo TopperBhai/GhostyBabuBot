@@ -99,7 +99,6 @@ for (const file of commandFiles) {
 }
 
 // Start Systems
-require('./src/systems/ghostLeaks')(client);
 require('./src/systems/stockMarket')(client);
 require('./src/systems/disasters')(client);
 require('./src/systems/newspaper')(client);

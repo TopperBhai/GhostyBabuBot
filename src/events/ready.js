@@ -50,29 +50,6 @@ module.exports = {
       }
     });
 
-    setInterval(async () => {
-      if (Math.random() > 0.3) return;
-      if (client.activeSpirit) return;
-
-      const guilds = Array.from(client.guilds.cache.values());
-      if (guilds.length === 0) return;
-      const randomGuild = guilds[Math.floor(Math.random() * guilds.length)];
-      
-      const textChannels = Array.from(randomGuild.channels.cache.filter(c => c.type === 0).values());
-      if (textChannels.length === 0) return;
-      const randomChannel = textChannels[Math.floor(Math.random() * textChannels.length)];
-
-      try {
-        await randomChannel.send("👻 **A Lost Spirit has appeared in this channel!** 👻\nQuick, type `/catch` to claim it before it vanishes!");
-        client.activeSpirit = { channelId: randomChannel.id, spawnedAt: Date.now() };
-        
-        setTimeout(() => {
-          if (client.activeSpirit && client.activeSpirit.channelId === randomChannel.id) {
-            client.activeSpirit = null;
-            randomChannel.send("💨 The Lost Spirit got bored and vanished into the ether...").catch(()=>{});
-          }
-        }, 10 * 60 * 1000);
-      } catch (err) {}
-    }, 30 * 60 * 1000);
+    // Random spirit popups removed per user request.
   }
 };

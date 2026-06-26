@@ -56,7 +56,7 @@ module.exports = {
         },
         {
           name: "🔮 MAGIC, SOCIAL & FAMILY",
-          value: "`cult found` `family propose` `family adopt` `media publish` `casino gamble` `mint` `catch`",
+          value: "`cult found` `family propose` `family adopt` `media publish` `casino gamble` `mint`",
           inline: false
         },
         {
